@@ -11,8 +11,6 @@ from data_models import DailyWeather
 
 features = [feature.name for feature in dataclasses.fields(DailyWeather) if feature.name not in ("date", "latitude", "longitude", "timezone")]
 
-
-
 @dataclass
 class WeatherRequest:
     start_date: datetime.date
