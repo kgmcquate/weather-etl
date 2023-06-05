@@ -76,9 +76,9 @@ Resources:
                                 --executor-memory 2G
                                 --executor-cores 2
                                 --conf spark.dynamicAllocation.enabled=false
-                                --conf spark.jars.packages=org.postgresql:postgresql:42.6.0
                                 --conf spark.archives=s3://${DeploymentZone}/weather_etl/pyspark_venv.tar.gz#venv
                               "
+                              # --conf spark.jars.packages=org.postgresql:postgresql:42.6.0
                         }
                       },
                       "ConfigurationOverrides": {
