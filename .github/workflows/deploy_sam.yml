@@ -61,7 +61,6 @@ jobs:
     - name: SAM deploy
       run: sam deploy
 
-    -
 
     # - name: SAM build
     #   run: cd lake_freeze_api/ && sam build
