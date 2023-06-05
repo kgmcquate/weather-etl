@@ -15,6 +15,22 @@ Parameters:
     Default: emr-zone-117819748843-us-east-1
 
 Resources:
+  ETLJobTrigger:
+    Type: AWS::Events::Rule
+    Properties: 
+      # Description: String
+      Name: WeatherETLJobTrigger
+      RoleArn: !Ref ExecutionRoleArn
+      ScheduleExpression: "cron(0 6 * * ? *)"
+      State: ENABLED
+      Targets:
+        - Id: ETLStepFunction
+          Arn: !GetAtt StepFunctionStateMachine.Arn
+          Input: "{\n  \"input\": \"{}\"\n}"
+          RetryPolicy:
+            MaximumEventAgeInSeconds: 300
+            MaximumRetryAttempts: 3
+          RoleArn: !Ref ExecutionRoleArn
 
   EMRServerlessApplication:
     Type: AWS::EMRServerless::Application
@@ -63,7 +79,7 @@ Resources:
                       }
                     }
                 },
-                "Resource": "arn:aws:states:::aws-sdk:emrserverless:startJobRun.waitForTaskToken"
+                "Resource": "arn:aws:states:::aws-sdk:emrserverless:startJobRun"
                 }
             }
         }
@@ -72,20 +88,5 @@ Resources:
 
 
 
-  ETLJobTrigger:
-    Type: AWS::Events::Rule
-    Properties: 
-      # Description: String
-      Name: WeatherETLJobTrigger
-      RoleArn: !Ref ExecutionRoleArn
-      ScheduleExpression: "cron(0 6 * * ? *)"
-      State: ENABLED
-      Targets:
-        - Id: ETLStepFunction
-          Arn: !GetAtt StepFunctionStateMachine.Arn
-          Input: "{\n  \"input\": \"{}\"\n}"
-          RetryPolicy:
-            MaximumEventAgeInSeconds: 300
-            MaximumRetryAttempts: 3
-          RoleArn: !Ref ExecutionRoleArn
+
             
