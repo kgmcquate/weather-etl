@@ -1,10 +1,13 @@
 import os, json, boto3
+from pyspark.sql import SparkSession
 import dataclasses
 import datetime
 from dataclasses import dataclass
 from urllib.parse import urlencode
 import requests
 import pprint
+import database
+
 api_url = "api.open-meteo.com/v1/"
 
 from data_models import DailyWeather
@@ -66,16 +69,23 @@ class WeatherRequest:
         return daily_weathers
     
 
-req = WeatherRequest(
-    start_date=datetime.date.fromisoformat("2023-01-01"),
-    end_date=datetime.date.fromisoformat("2023-01-07"),
-    latitude=52.52,
-    longitude=13.419998
-)
+def main(spark = SparkSession.builder.getOrCreate()):
+    jdbc_url = f"jdbc:postgresql://{database.db_endpoint}"
 
-pprint.pprint(
-    req.get_weather_data()
-)
+    df = spark.read.jdbc(jdbc_url, "lakes", {"user": database.db_username, "password": database.db_password})
+
+    df.show()
+
+    req = WeatherRequest(
+        start_date=datetime.date.fromisoformat("2023-01-01"),
+        end_date=datetime.date.fromisoformat("2023-01-07"),
+        latitude=52.52,
+        longitude=13.419998
+    )
+
+    pprint.pprint(
+        req.get_weather_data()
+    )
 
 
 

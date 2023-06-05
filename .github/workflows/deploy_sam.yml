@@ -12,7 +12,31 @@ permissions:
   contents: read
 
 jobs:
-  deploy:
+  deploy_python:
+    name: Deploy 
+    runs-on: ubuntu-latest
+    environment: production
+    container:
+      image: public.ecr.aws/sam/build-python3.9:latest
+
+    steps:
+      - name: Build python package
+        run: |
+          python -m venv pyspark_venv
+          source pyspark_venv/bin/activate
+          pip install ./
+          venv-pack -o pyspark_venv.tar.gz
+          aws s3 cp pyspark_venv.tar.gz s3://deployment-zone-${AWS_ACCOUNT_ID}/weather_etl/
+
+      - name: Copy Python files to S3 deployment zone
+        run: |
+          aws s3 cp spark_entrypoint.py s3://deployment-zone-${AWS_ACCOUNT_ID}/weather_etl/
+
+      
+
+
+    
+  deploy_sam:
     name: Deploy 
     runs-on: ubuntu-latest
     environment: production
@@ -30,14 +54,14 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ env.AWS_REGION }}
 
-    - name: Copy Python files to S3 deployment zone
-      run: aws s3 cp spark_entrypoint.py s3://deployment-zone-${AWS_ACCOUNT_ID}/weather_etl/
 
     - name: SAM build
       run: sam build
       
     - name: SAM deploy
       run: sam deploy
+
+    -
 
     # - name: SAM build
     #   run: cd lake_freeze_api/ && sam build

@@ -1,12 +1,7 @@
 
 from pyspark.sql import SparkSession
 
-spark = SparkSession.builder.getOrCreate()
 
-df = spark.sql("SELECT 'hello_world'")
+import app
 
-print(df.collect())
-
-import weather_etl
-
-weather_etl.main()
+app.main()
