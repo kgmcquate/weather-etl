@@ -58,28 +58,29 @@ Resources:
             "StartAt": "StartJobRun",
             "States": {
                 "StartJobRun": {
-                "Type": "Task",
-                "End": true,
-                "Parameters": {
-                    "Name": "Weather ETL",
-                    "ClientToken.$": "States.UUID()",
-                    "ApplicationId": !Ref EMRServerlessApplication,
-                    "ExecutionRoleArn": !Ref ExecutionRoleArn,
-                    "JobDriver": {
-                      "SparkSubmit": {
-                          "EntryPoint": !Sub "s3://${DeploymentZone}/weather_etl/spark_entrypoint.py",
-                          "SparkSubmitParameters": "--driver-memory 2G --driver-cores 2 --num-executors 1 --executor-memory 2G --executor-cores 2"
-                      }
-                    },
-                    "ConfigurationOverrides": {
-                      "MonitoringConfiguration": {
-                        "S3MonitoringConfiguration": {
-                          "LogUri": !Sub "s3://${EmrZone}/logging/"
+                  "Type": "Task",
+                  "End": true,
+                  "Parameters": {
+                      "Name": "Weather ETL",
+                      "ClientToken.$": "States.UUID()",
+                      "ApplicationId": !Ref EMRServerlessApplication,
+                      "ExecutionRoleArn": !Ref ExecutionRoleArn,
+                      "JobDriver": {
+                        "SparkSubmit": {
+                            "EntryPoint": !Sub "s3://${DeploymentZone}/weather_etl/spark_entrypoint.py",
+                            "SparkSubmitParameters": "--driver-memory 2G --driver-cores 2 --num-executors 1 --executor-memory 2G --executor-cores 2"
                         }
-                      }
-                    }
-                },
-                "Resource": "arn:aws:states:::aws-sdk:emrserverless:startJobRun"
+                      },
+                      "ConfigurationOverrides": {
+                        "MonitoringConfiguration": {
+                          "S3MonitoringConfiguration": {
+                            "LogUri": !Sub "s3://${EmrZone}/logging/"
+                          }
+                        }
+                      },
+                      "ExecutionTimeoutMinutes": 20
+                  },
+                  "Resource": "arn:aws:states:::aws-sdk:emrserverless:startJobRun"
                 }
             }
         }
