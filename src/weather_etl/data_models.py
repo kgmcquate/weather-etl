@@ -4,7 +4,7 @@ import datetime
 
 from dataclasses import dataclass
     
-@dataclass
+@dataclass(slot=True)
 class DailyWeather:
     date: datetime.date
     latitude: float

@@ -1,3 +1,5 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
 
 Parameters:
   ExecutionRoleArn:
@@ -7,6 +9,10 @@ Parameters:
   DeploymentZone:
     Type: String
     Default: deployment-zone-117819748843
+
+  EmrZone:
+    Type: String
+    Default: emr-zone-117819748843-us-east-1
 
 Resources:
 
@@ -21,35 +27,65 @@ Resources:
         Enabled: true
         IdleTimeoutMinutes: 1
       MaximumCapacity: 
-        Cpu: vCPU
+        Cpu: 4vCPU
         Disk: 100GB
         Memory: 16GB
       ReleaseLabel: "emr-6.10.0"
       Type: Spark
   
+  StepFunctionStateMachine:
+    Type: AWS::StepFunctions::StateMachine
+    Properties:
+      StateMachineName: EMRWeatherETLJobStateMachine
+      Definition: {
+            "Comment": "Runs EMR Serverless job for Weather ETL",
+            "StartAt": "StartJobRun",
+            "States": {
+                "StartJobRun": {
+                "Type": "Task",
+                "End": true,
+                "Parameters": {
+                    "Name": "Weather ETL",
+                    "ClientToken.$": "States.UUID()",
+                    "ApplicationId": !Ref EMRServerlessApplication,
+                    "ExecutionRoleArn": !Ref ExecutionRoleArn,
+                    "JobDriver": {
+                      "SparkSubmit": {
+                          "EntryPoint": !Sub "s3://${DeploymentZone}/weather_etl/spark_entrypoint.py",
+                          "SparkSubmitParameters": "--driver-memory 2G --driver-cores 2 --num-executors 1 --executor-memory 2G --executor-cores 2"
+                      }
+                    },
+                    "ConfigurationOverrides": {
+                      "MonitoringConfiguration": {
+                        "S3MonitoringConfiguration": {
+                          "LogUri": !Sub "s3://${EmrZone}/logging/"
+                        }
+                      }
+                    }
+                },
+                "Resource": "arn:aws:states:::aws-sdk:emrserverless:startJobRun.waitForTaskToken"
+                }
+            }
+        }
+
+      RoleArn: !Ref ExecutionRoleArn
+
+
+
   ETLJobTrigger:
     Type: AWS::Events::Rule
     Properties: 
       # Description: String
-      # EventBusName: default
-      # EventPattern: Json
       Name: WeatherETLJobTrigger
       RoleArn: !Ref ExecutionRoleArn
       ScheduleExpression: "cron(0 6 * * ? *)"
-      State: Enabled
+      State: ENABLED
       Targets:
-        - Id: emrjob 
-          Arn: "arn:aws:scheduler:::aws-sdk:emrserverless:startJobRun"
-          Input: { 
-              "Name": "Weather ETL",
-              "ApplicationId": !Ref EMRServerlessApplication, 
-              "ExecutionRoleArn": !Ref ExecutionRoleArn,
-              "JobDriver": {
-                "sparkSubmit": {
-                  "entryPoint": !Sub "s3://${DeploymentZone}/weather_etl/spark_entrypoint.py"
-                  # ,
-                  # "entryPointArguements": ,
-                  # "sparkSubmitParameters": 
-                }
-              }
-            }
+        - Id: ETLStepFunction
+          Arn: !GetAtt StepFunctionStateMachine.Arn
+          Input: "{\n  \"input\": \"{}\"\n}"
+          RetryPolicy:
+            MaximumEventAgeInSeconds: 300
+            MaximumRetryAttempts: 3
+          RoleArn: !Ref ExecutionRoleArn
+            
