@@ -13,13 +13,23 @@ permissions:
 
 jobs:
   deploy_python:
-    name: Deploy 
+    name: Deploy Python Package
     runs-on: ubuntu-latest
     environment: production
     container:
       image: public.ecr.aws/sam/build-python3.9:latest
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+          
       - name: Build python package
         run: |
           python -m venv pyspark_venv
@@ -37,7 +47,7 @@ jobs:
 
     
   deploy_sam:
-    name: Deploy 
+    name: Deploy SAM template
     runs-on: ubuntu-latest
     environment: production
     container:
