@@ -42,10 +42,10 @@ jobs:
       - name: Build python package
         run: |
           pip install venv-pack
-          python -m venv pyspark_venv
+          python -m venv pyspark_venv 
           source pyspark_venv/bin/activate
           pip install ./
-          venv-pack -o pyspark_env.tar.gz
+          venv-pack -f -o pyspark_env.tar.gz --python-prefix /home/hadoop/environment
           aws s3 cp pyspark_env.tar.gz s3://deployment-zone-${AWS_ACCOUNT_ID}/weather_etl/
 
       - name: Copy Python files to S3 deployment zone
