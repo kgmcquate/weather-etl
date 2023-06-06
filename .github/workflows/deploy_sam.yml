@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
     container:
-      image: continuumio/anaconda3:latest
+      image: public.ecr.aws/sam/build-python3.7:latest
 
     steps:
       - name: Checkout
@@ -30,23 +30,23 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Build python package
-        run: |
-          pip install awscli
-          conda install conda-pack
-          conda create --name pyspark_env --file src/app/requirements.txt python=3.9
-          conda pack -n pyspark_env -o pyspark_env.tar.gz
-          aws s3 cp pyspark_env.tar.gz s3://deployment-zone-${AWS_ACCOUNT_ID}/weather_etl/
-
-
       # - name: Build python package
       #   run: |
-      #     pip install venv-pack
-      #     python -m venv pyspark_venv
-      #     source pyspark_venv/bin/activate
-      #     pip install ./
-      #     venv-pack -o pyspark_venv.tar.gz
-      #     aws s3 cp pyspark_venv.tar.gz s3://deployment-zone-${AWS_ACCOUNT_ID}/weather_etl/
+      #     pip install awscli
+      #     conda install conda-pack
+      #     conda create --name pyspark_env --file src/app/requirements.txt python=3.9
+      #     conda pack -n pyspark_env -o pyspark_env.tar.gz
+      #     aws s3 cp pyspark_env.tar.gz s3://deployment-zone-${AWS_ACCOUNT_ID}/weather_etl/
+
+
+      - name: Build python package
+        run: |
+          pip install venv-pack
+          python -m venv pyspark_venv
+          source pyspark_venv/bin/activate
+          pip install ./
+          venv-pack -o pyspark_env.tar.gz
+          aws s3 cp pyspark_env.tar.gz s3://deployment-zone-${AWS_ACCOUNT_ID}/weather_etl/
 
       - name: Copy Python files to S3 deployment zone
         run: |

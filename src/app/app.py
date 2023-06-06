@@ -28,7 +28,7 @@ class WeatherRequest:
 
         pass
 
-    def _get_request_params(self) -> dict[str, str]:
+    def _get_request_params(self): # -> dict[str, str]
         return {
             "daily": ','.join(self.features),
             "start_date": self.start_date.isoformat(),
@@ -38,19 +38,19 @@ class WeatherRequest:
             "timezone": "auto" # The local timezone
         }
 
-    def _get_request_url(self) -> str:
+    def _get_request_url(self): #  -> str
         return f"https://{self.api_url}forecast?{urlencode(self._get_request_params())}"
     
     def _send_request(self):
         return requests.get(url=self._get_request_url())
 
-    def get_weather_data(self) -> list[DailyWeather]:
+    def get_weather_data(self): # -> list[DailyWeather]
         response = self._send_request().json()
 
-        daily_data: dict[str, list] = response["daily"]
-        local_tz: str = response["timezone"]
+        daily_data = response["daily"] # : dict[str, list]
+        local_tz = response["timezone"] # : str 
 
-        daily_weathers: list[DailyWeather] = []
+        daily_weathers = [] # : list[DailyWeather] 
         for i, date in enumerate(daily_data["time"]):
             features_dict = {}
             for feature in features:
