@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
     container:
-      image: continuumio/miniconda3:latest #public.ecr.aws/sam/build-python3.7:latest #public.ecr.aws/sam/build-python3.9:latest #amazonlinux:2 #
+      image: continuumio/miniconda3 #public.ecr.aws/sam/build-python3.7:latest #public.ecr.aws/sam/build-python3.9:latest #amazonlinux:2 #
 
     steps:
 
@@ -37,10 +37,10 @@ jobs:
       - name: Build python package
         run: |
           conda init
+          bash /root/.bashrc
           pip install awscli build
           python -m build --sdist ./
-          pip install dist/*
-          source /root/.bashrc
+          pip install dist/*          
           conda install conda-pack
           conda create -y --name pyspark_env --file src/app/requirements.txt python=3.9 
           conda activate pyspark_env
