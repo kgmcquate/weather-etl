@@ -40,9 +40,9 @@ jobs:
           bash /github/home/.bashrc
           pip install awscli build
           python -m build --sdist ./
-          pip install dist/*          
           conda install conda-pack
           conda create -y --name pyspark_env --file src/app/requirements.txt python=3.11
+          pip install dist/*  
           # conda activate pyspark_env
           # pip install ./
           # conda deactivate
