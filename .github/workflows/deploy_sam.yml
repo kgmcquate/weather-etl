@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
     container:
-      image: amazonlinux:2 #continuumio/miniconda3 #public.ecr.aws/sam/build-python3.7:latest #public.ecr.aws/sam/build-python3.9:latest #amazonlinux:2 #
+      image: public.ecr.aws/sam/build-python3.9:latest #continuumio/miniconda3 #public.ecr.aws/sam/build-python3.7:latest #public.ecr.aws/sam/build-python3.9:latest #amazonlinux:2 #
 
     steps:
 
@@ -52,8 +52,8 @@ jobs:
       - name: Build
         run: |
           # install Python 3.9.9 and activate the venv
-          yum install -y python3
-          python -m pip install venv
+          # yum install -y python3
+          # python -m pip install venv
 
           # create python venv with Python 3.9.9
           python -m venv pyspark_venv --copies 
