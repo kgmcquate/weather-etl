@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
     container:
-      image: amazonlinux:2
+      image: public.ecr.aws/amazonlinux/amazonlinux:2
 
     steps:
       - name: Checkout
