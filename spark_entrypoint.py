@@ -118,8 +118,10 @@ def main(spark = SparkSession.builder.getOrCreate()):
         req.get_weather_data()
     )
 
-
-
+import sys
+print(sys.path)
+print(sys.version)
+main()
 
 
 # url = "https://api.open-meteo.com/v1/forecast?latitude=52.52&longitude=13.41&daily=
