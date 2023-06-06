@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
     container:
-      image: amazonlinux:2 #continuumio/miniconda3:latest #public.ecr.aws/sam/build-python3.7:latest
+      image: public.ecr.aws/sam/build-python3.9:latest #amazonlinux:2 #continuumio/miniconda3:latest #public.ecr.aws/sam/build-python3.7:latest
 
     steps:
 
@@ -45,15 +45,20 @@ jobs:
       - name: Build
         run: |
           # install Python 3.9.9 and activate the venv
-          yum install -y gcc openssl-devel bzip2-devel libffi-devel tar gzip wget make
-          wget https://www.python.org/ftp/python/3.9.9/Python-3.9.9.tgz && \
-          tar xzf Python-3.9.9.tgz && cd Python-3.9.9 && \
-          ./configure --enable-optimizations && \
-          make altinstall
+          # yum install -y gcc openssl-devel bzip2-devel libffi-devel tar gzip wget make
+          # wget https://www.python.org/ftp/python/3.9.9/Python-3.9.9.tgz && \
+          # tar xzf Python-3.9.9.tgz && cd Python-3.9.9 && \
+          # ./configure --enable-optimizations && \
+          # make altinstall
 
           # create python venv with Python 3.9.9
           python3.9 -m venv pyspark_venv_python_3.9.9 --copies 
           source pyspark_venv_python_3.9.9/bin/activate
+
+          # Install application
+          pip install ./
+
+
 
           # copy system python3 libraries to venv
           cp -r /usr/local/lib/python3.9/* ./pyspark_venv_python_3.9.9/lib/python3.9/
@@ -65,6 +70,8 @@ jobs:
           # Copying the python binary to the "environment" directory.
           pip3 install venv-pack
           venv-pack -f -o pyspark_env.tar.gz --python-prefix /home/hadoop/environment
+
+          pip3 install awscli
           aws s3 cp pyspark_env.tar.gz s3://deployment-zone-${AWS_ACCOUNT_ID}/weather_etl/
 
 
