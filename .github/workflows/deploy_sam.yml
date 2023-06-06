@@ -42,7 +42,7 @@ jobs:
           python -m build --sdist ./
           pip install dist/*          
           conda install conda-pack
-          conda create -y --name pyspark_env --file src/app/requirements.txt python=3.9 
+          conda create -y --name pyspark_env --file src/app/requirements.txt python=3.11
           # conda activate pyspark_env
           # pip install ./
           # conda deactivate
