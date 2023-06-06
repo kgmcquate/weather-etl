@@ -37,7 +37,7 @@ jobs:
       - name: Build python package
         run: |
           conda init
-          bash /root/.bashrc
+          source /root/.bashrc
           pip install awscli build
           python -m build --sdist ./
           pip install dist/*          
