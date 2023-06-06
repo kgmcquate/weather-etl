@@ -32,7 +32,7 @@ jobs:
 
       - name: Build python package
         run: |
-          conda install conda-pack
+          conda install conda-pack awscli
           conda create --name pyspark_env --file src/app/requirements.txt python=3.9
           conda pack -n pyspark_env -o pyspark_env.tar.gz
           aws s3 cp pyspark_venv.tar.gz s3://deployment-zone-${AWS_ACCOUNT_ID}/weather_etl/
