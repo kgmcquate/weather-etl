@@ -52,23 +52,22 @@ jobs:
           # make altinstall
 
           # create python venv with Python 3.9.9
-          python3.9 -m venv pyspark_venv_python_3.9.9 --copies 
-          source pyspark_venv_python_3.9.9/bin/activate
+          python-m venv pyspark_venv --copies 
+          source pyspark_venv/bin/activate
 
           # Install application
           pip install ./
 
 
-
           # copy system python3 libraries to venv
-          cp -r /usr/local/lib/python3.9/* ./pyspark_venv_python_3.9.9/lib/python3.9/
+          # cp -r /usr/local/lib/python/* ./pyspark_venv/lib/python3.9/
 
           # package venv to archive. 
           # **Note** that you have to supply --python-prefix option 
           # to make sure python starts with the path where your 
           # copied libraries are present.
           # Copying the python binary to the "environment" directory.
-          pip3 install venv-pack
+          pip install venv-pack
           venv-pack -f -o pyspark_env.tar.gz --python-prefix /home/hadoop/environment
 
           pip3 install awscli
