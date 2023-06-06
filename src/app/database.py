@@ -1,4 +1,3 @@
-import sqlmodel
 import json
 import os
 import boto3

@@ -1,2 +1,3 @@
 requests
-pyspark
+boto3
+# pyspark # provided by emr

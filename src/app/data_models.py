@@ -1,5 +1,3 @@
-from sqlmodel import SQLModel, Field
-from typing import Optional
 import datetime
 
 from dataclasses import dataclass
