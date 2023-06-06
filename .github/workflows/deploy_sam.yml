@@ -52,7 +52,7 @@ jobs:
           # make altinstall
 
           # create python venv with Python 3.9.9
-          python-m venv pyspark_venv --copies 
+          python -m venv pyspark_venv --copies 
           source pyspark_venv/bin/activate
 
           # Install application
