@@ -34,48 +34,48 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      # - name: Build python package
-      #   run: |
-      #     conda init
-      #     bash /github/home/.bashrc
-      #     pip install awscli build
-      #     python -m build --sdist ./
-      #     pip install dist/*          
-      #     conda install conda-pack
-      #     conda create -y --name pyspark_env --file src/app/requirements.txt python=3.9 
-      #     # conda activate pyspark_env
-      #     # pip install ./
-      #     # conda deactivate
-      #     conda pack -n pyspark_env -o pyspark_env.tar.gz
-      #     aws s3 cp pyspark_env.tar.gz s3://deployment-zone-${AWS_ACCOUNT_ID}/weather_etl/
-
-      - name: Build
+      - name: Build python package
         run: |
-          # install Python 3.9.9 and activate the venv
-          # yum install -y python3
-          # python -m pip install venv
-
-          # create python venv with Python 3.9.9
-          python -m venv pyspark_venv --copies 
-          source pyspark_venv/bin/activate
-
-          # Install application
+          conda init
+          bash /github/home/.bashrc
+          pip install awscli build
+          python -m build --sdist ./
+          pip install dist/*          
+          conda install conda-pack
+          conda create -y --name pyspark_env --file src/app/requirements.txt python=3.9 
+          # conda activate pyspark_env
           # pip install ./
-
-
-          # copy system python3 libraries to venv
-          # cp -r /usr/local/lib/python/* ./pyspark_venv/lib/python3.9/
-
-          # package venv to archive. 
-          # **Note** that you have to supply --python-prefix option 
-          # to make sure python starts with the path where your 
-          # copied libraries are present.
-          # Copying the python binary to the "environment" directory.
-          pip install venv-pack
-          venv-pack -f -o pyspark_env.tar.gz --python-prefix /home/hadoop/environment
-
-          pip3 install awscli
+          # conda deactivate
+          conda pack -n pyspark_env -o pyspark_env.tar.gz
           aws s3 cp pyspark_env.tar.gz s3://deployment-zone-${AWS_ACCOUNT_ID}/weather_etl/
+
+      # - name: Build
+      #   run: |
+      #     # install Python 3.9.9 and activate the venv
+      #     # yum install -y python3
+      #     # python -m pip install venv
+
+      #     # create python venv with Python 3.9.9
+      #     python -m venv pyspark_venv --copies 
+      #     source pyspark_venv/bin/activate
+
+      #     # Install application
+      #     # pip install ./
+
+
+      #     # copy system python3 libraries to venv
+      #     # cp -r /usr/local/lib/python/* ./pyspark_venv/lib/python3.9/
+
+      #     # package venv to archive. 
+      #     # **Note** that you have to supply --python-prefix option 
+      #     # to make sure python starts with the path where your 
+      #     # copied libraries are present.
+      #     # Copying the python binary to the "environment" directory.
+      #     pip install venv-pack
+      #     venv-pack -f -o pyspark_env.tar.gz --python-prefix /home/hadoop/environment
+
+      #     pip3 install awscli
+      #     aws s3 cp pyspark_env.tar.gz s3://deployment-zone-${AWS_ACCOUNT_ID}/weather_etl/
 
 
 
