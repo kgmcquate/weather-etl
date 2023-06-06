@@ -36,9 +36,13 @@ jobs:
 
       - name: Build python package
         run: |
-          pip install awscli
+          conda init
+          pip install awscli build
+          python -m build --sdist ./
+          pip install dist/*
+          source /root/.bashrc
           conda install conda-pack
-          conda create --name pyspark_env --file src/app/requirements.txt python=3.9 
+          conda create -y --name pyspark_env --file src/app/requirements.txt python=3.9 
           conda activate pyspark_env
           pip install ./
           conda deactivate
