@@ -43,9 +43,9 @@ jobs:
           pip install dist/*          
           conda install conda-pack
           conda create -y --name pyspark_env --file src/app/requirements.txt python=3.9 
-          conda activate pyspark_env
-          pip install ./
-          conda deactivate
+          # conda activate pyspark_env
+          # pip install ./
+          # conda deactivate
           conda pack -n pyspark_env -o pyspark_env.tar.gz
           aws s3 cp pyspark_env.tar.gz s3://deployment-zone-${AWS_ACCOUNT_ID}/weather_etl/
 
