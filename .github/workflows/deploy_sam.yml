@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
     container:
-      image: continuumio/miniconda3:latest #public.ecr.aws/sam/build-python3.7:latest
+      image: amazonlinux:2 #continuumio/miniconda3:latest #public.ecr.aws/sam/build-python3.7:latest
 
     steps:
 
