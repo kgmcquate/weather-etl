@@ -18,7 +18,7 @@ import datetime
 
 from dataclasses import dataclass
     
-@dataclass(slot=True)
+@dataclass(slots=True)
 class DailyWeather:
     date: datetime.date
     latitude: float
@@ -41,7 +41,7 @@ class DailyWeather:
     winddirection_10m_dominant: float
     shortwave_radiation_sum: float
     et0_fao_evapotranspiration: float
-    
+
 
 features = [feature.name for feature in dataclasses.fields(DailyWeather) if feature.name not in ("date", "latitude", "longitude", "timezone")]
 

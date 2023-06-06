@@ -60,7 +60,7 @@ jobs:
           source pyspark_venv/bin/activate
 
           # Install application
-          pip install ./
+          # pip install ./
 
 
           # copy system python3 libraries to venv
