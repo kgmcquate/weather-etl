@@ -53,6 +53,7 @@ jobs:
         run: |
           # install Python 3.9.9 and activate the venv
           yum install -y python3
+          python -m pip install venv
 
           # create python venv with Python 3.9.9
           python -m venv pyspark_venv --copies 
