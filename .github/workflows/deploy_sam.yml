@@ -22,7 +22,7 @@ jobs:
     steps:
 
       - name: install tar
-        run: yum install tar git
+        run: yum install -y tar git 
 
       - name: Checkout
         uses: actions/checkout@v3
