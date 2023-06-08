@@ -37,15 +37,15 @@ jobs:
       - name: Build python package
         run: |
           conda init
-          bash /github/home/.bashrc
+          ls -la /github/home/
+          source /github/home/.bashrc
           pip install awscli build
           python -m build --sdist ./
           conda install conda-pack
           conda create -y --name pyspark_env --file src/app/requirements.txt python=3.11
-          pip install dist/*  
-          # conda activate pyspark_env
-          # pip install ./
-          # conda deactivate
+          conda activate pyspark_env
+          pip install dist/*
+          conda deactivate
           conda pack -n pyspark_env -o pyspark_env.tar.gz -f --ignore-missing-files --exclude lib/python3.1
           aws s3 cp pyspark_env.tar.gz s3://deployment-zone-${AWS_ACCOUNT_ID}/weather_etl/
 
