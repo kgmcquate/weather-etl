@@ -80,8 +80,8 @@ Resources:
                                 --conf spark.emr-serverless.driverEnv.PYSPARK_DRIVER_PYTHON=/home/hadoop/./environment/bin/python
                                 --conf spark.emr-serverless.driverEnv.PYSPARK_PYTHON=/home/hadoop/./environment/bin/python 
                                 --conf spark.executorEnv.PYSPARK_PYTHON=/home/hadoop/./environment/bin/python
-                              "                                
-                              # --conf spark.jars.packages=org.postgresql:postgresql:42.6.0
+                                --conf spark.jars.packages=org.postgresql:postgresql:42.6.0
+                              "
                         }
                       },
                       "ConfigurationOverrides": {
