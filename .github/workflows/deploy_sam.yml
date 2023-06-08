@@ -38,7 +38,8 @@ jobs:
         run: |
           conda init
           ls -la /github/home/
-          source /github/home/.bashrc
+          chmod 777 /github/home/.bashrc
+          /github/home/.bashrc
           pip install awscli build
           python -m build --sdist ./
           conda install conda-pack
