@@ -46,7 +46,7 @@ jobs:
           # conda activate pyspark_env
           # pip install ./
           # conda deactivate
-          conda pack -n pyspark_env -o pyspark_env.tar.gz
+          conda pack -n pyspark_env -o pyspark_env.tar.gz -f --ignore-missing-files --exclude lib/python3.1
           aws s3 cp pyspark_env.tar.gz s3://deployment-zone-${AWS_ACCOUNT_ID}/weather_etl/
 
       # - name: Build
