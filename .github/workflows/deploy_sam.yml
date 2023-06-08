@@ -40,6 +40,7 @@ jobs:
           ls -la /github/home/
           chmod 777 /github/home/.bashrc
           /github/home/.bashrc
+          reset
           pip install awscli build
           python -m build --sdist ./
           conda install conda-pack
