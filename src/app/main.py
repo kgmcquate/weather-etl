@@ -72,11 +72,11 @@ class WeatherRequest:
 def main(spark = SparkSession.builder.getOrCreate()):
     from .database import db_endpoint, db_password, db_username
 
-    # jdbc_url = f"jdbc:postgresql://{db_endpoint}"
+    jdbc_url = f"jdbc:postgresql://{db_endpoint}"
 
-    # df = spark.read.jdbc(jdbc_url, "lakes", {"user": db_username, "password": db_password})
+    df = spark.read.jdbc(jdbc_url, "lakes", {"user": db_username, "password": db_password})
 
-    # df.show()
+    df.show()
 
     req = WeatherRequest(
         start_date=datetime.date.fromisoformat("2023-01-01"),
