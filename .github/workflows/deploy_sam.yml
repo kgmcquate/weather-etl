@@ -86,7 +86,7 @@ jobs:
           python -m build --sdist ./
           python -m venv pyspark_venv 
           chmod 777 ./pyspark_venv/bin/activate
-          ./pyspark_venv/bin/activate
+          source ./pyspark_venv/bin/activate
           pip install dist/*
           venv-pack -f -o pyspark_env.tar.gz --python-prefix /home/hadoop/environment
           aws s3 cp pyspark_env.tar.gz s3://deployment-zone-${AWS_ACCOUNT_ID}/weather_etl/
