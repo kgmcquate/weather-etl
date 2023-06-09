@@ -18,6 +18,14 @@ Parameters:
     Type: String
     Default: 117819748843.dkr.ecr.us-east-1.amazonaws.com/weather-etl/pyspark-env:latest
 
+  SecurityGroupIds:
+    Type: CommaDelimitedList
+    Default: sg-06ccb1d8e6918a05c
+
+  SubnetIds:
+    Type: CommaDelimitedList
+    Default: subnet-07e2023c25351b29b
+
 Resources:
   ETLJobTrigger:
     Type: AWS::Events::Rule
@@ -54,6 +62,9 @@ Resources:
       Type: Spark
       ImageConfiguration:
         ImageUri: !Ref DockerImageUri
+      NetworkConfiguration:
+        SecurityGroupIds: !Ref SecurityGroupIds
+        SubnetIds: !Ref SubnetIds
 
   
   StepFunctionStateMachine:
