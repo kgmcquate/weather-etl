@@ -83,10 +83,6 @@ Resources:
                                 --executor-memory 2G
                                 --executor-cores 2
                                 --conf spark.dynamicAllocation.enabled=false
-                                --conf spark.archives=s3://${DeploymentZone}/weather_etl/pyspark_env.tar.gz#environment
-                                --conf spark.emr-serverless.driverEnv.PYSPARK_DRIVER_PYTHON=/home/hadoop/environment/bin/python3
-                                --conf spark.emr-serverless.driverEnv.PYSPARK_PYTHON=/home/hadoop/environment/bin/python3
-                                --conf spark.executorEnv.PYSPARK_PYTHON=/home/hadoop/environment/bin/python3
                                 --conf spark.jars.packages=org.postgresql:postgresql:42.6.0
                               "
                         }
@@ -106,3 +102,7 @@ Resources:
         }
 
       
+                                # --conf spark.archives=s3://${DeploymentZone}/weather_etl/pyspark_env.tar.gz#environment
+                                # --conf spark.emr-serverless.driverEnv.PYSPARK_DRIVER_PYTHON=/home/hadoop/environment/bin/python3
+                                # --conf spark.emr-serverless.driverEnv.PYSPARK_PYTHON=/home/hadoop/environment/bin/python3
+                                # --conf spark.executorEnv.PYSPARK_PYTHON=/home/hadoop/environment/bin/python3
