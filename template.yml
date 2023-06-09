@@ -83,7 +83,6 @@ Resources:
                                 --executor-memory 2G
                                 --executor-cores 2
                                 --conf spark.dynamicAllocation.enabled=false
-                                --conf spark.jars.packages=org.postgresql:postgresql:42.6.0
                               "
                         }
                       },
@@ -101,6 +100,8 @@ Resources:
             }
         }
 
+# --jars https://repo1.maven.org/maven2/org/postgresql/postgresql/42.6.0/postgresql-42.6.0.jar
+                                # --jars https://repo1.maven.org/maven2/org/postgresql/postgresql/42.6.0/postgresql-42.6.0.jar
       
                                 # --conf spark.archives=s3://${DeploymentZone}/weather_etl/pyspark_env.tar.gz#environment
                                 # --conf spark.emr-serverless.driverEnv.PYSPARK_DRIVER_PYTHON=/home/hadoop/environment/bin/python3
