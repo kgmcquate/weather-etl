@@ -13,5 +13,7 @@ COPY ./src/app/requirements.txt ./requirements.txt
 
 RUN pip install -r requirements.xt
 
+
+
 # EMRS will run the image as hadoop
 USER hadoop:hadoop

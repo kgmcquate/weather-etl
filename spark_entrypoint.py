@@ -27,4 +27,4 @@ import os
 
 # files = print_tree("/home/hadoop/")
 
-[print(f) for f in files]
+# [print(f) for f in files]
