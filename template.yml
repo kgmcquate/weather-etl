@@ -45,7 +45,7 @@ Resources:
         Enabled: true
       AutoStopConfiguration: 
         Enabled: true
-        IdleTimeoutMinutes: 1
+        IdleTimeoutMinutes: 2
       MaximumCapacity: 
         Cpu: 4vCPU
         Disk: 100GB
