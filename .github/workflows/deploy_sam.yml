@@ -45,7 +45,7 @@ jobs:
           repo: weather-etl/pyspark-env
           region: ${{ env.AWS_REGION }}
           tags: latest
-          create_repo: true
+          create_repo: false
          
 
       - name: Copy Python files to S3 deployment zone
