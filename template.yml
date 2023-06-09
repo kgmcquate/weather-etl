@@ -106,26 +106,24 @@ Resources:
                                 # --conf spark.emr-serverless.driverEnv.PYSPARK_DRIVER_PYTHON=/home/hadoop/environment/bin/python3
                                 # --conf spark.emr-serverless.driverEnv.PYSPARK_PYTHON=/home/hadoop/environment/bin/python3
                                 # --conf spark.executorEnv.PYSPARK_PYTHON=/home/hadoop/environment/bin/python3
-    ECRRepository:
-      Type: AWS::ECR::Repository
-      Properties:
-        LifecyclePolicy: 
-          LifecyclePolicy
-        RepositoryName: "weather-etl/pyspark-env"
-        RepositoryPolicyText: {
-            "Version": "2012-10-17",
-            "Statement": [
-              {
-                "Sid": "Emr Serverless Custom Image Support",
-                "Effect": "Allow",
-                "Principal": {
-                  "Service": "emr-serverless.amazonaws.com"
-                },
-                "Action": [
-                  "ecr:BatchGetImage",
-                  "ecr:DescribeImages",
-                  "ecr:GetDownloadUrlForLayer"
-                ]
-              }
-            ]
-          }
+  ECRRepository:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: "weather-etl/pyspark-env"
+      RepositoryPolicyText: {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Sid": "Emr Serverless Custom Image Support",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "emr-serverless.amazonaws.com"
+              },
+              "Action": [
+                "ecr:BatchGetImage",
+                "ecr:DescribeImages",
+                "ecr:GetDownloadUrlForLayer"
+              ]
+            }
+          ]
+        }
