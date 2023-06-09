@@ -14,6 +14,10 @@ Parameters:
     Type: String
     Default: emr-zone-117819748843-us-east-1
 
+  DockerImageUri:
+    Type: String
+    Default: 117819748843.dkr.ecr.us-east-1.amazonaws.com/weather-etl/pyspark-env:latest
+
 Resources:
   ETLJobTrigger:
     Type: AWS::Events::Rule
@@ -48,6 +52,9 @@ Resources:
         Memory: 16GB
       ReleaseLabel: "emr-6.10.0"
       Type: Spark
+      ImageConfiguration:
+        ImageUri: !Ref DockerImageUri
+
   
   StepFunctionStateMachine:
     Type: AWS::StepFunctions::StateMachine
