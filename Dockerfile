@@ -2,7 +2,9 @@ FROM public.ecr.aws/emr-serverless/spark/emr-6.10.0:latest
 
 USER root
 
-COPY ./src/app/requirements.txt ./requirements.txt
+# COPY ./src/app/requirements.txt ./requirements.txt
+
+COPY ./dist/* ./dist/
 
 # install python 3
 # RUN yum install -y gcc openssl-devel bzip2-devel libffi-devel tar gzip wget make
@@ -11,7 +13,7 @@ COPY ./src/app/requirements.txt ./requirements.txt
 #     ./configure --enable-optimizations && \
 #     make altinstall
 
-RUN pip install -r requirements.xt
+RUN pip install ./dist/*
 
 
 
