@@ -2,7 +2,7 @@ FROM public.ecr.aws/emr-serverless/spark/emr-6.10.0:latest
 
 USER root
 
-# COPY ./src/app/requirements.txt ./requirements.txt
+COPY ./src/app/requirements.txt ./requirements.txt
 
 COPY ./dist/* ./dist/
 
@@ -13,7 +13,7 @@ COPY ./dist/* ./dist/
 #     ./configure --enable-optimizations && \
 #     make altinstall
 
-RUN pip3 install ./dist/*
+RUN pip3 install -r requirements.txt && pip3 install ./dist/*
 
 # EMRS will run the image as hadoop
 USER hadoop:hadoop
