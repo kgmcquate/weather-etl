@@ -77,7 +77,6 @@ Resources:
                                 --executor-cores 2
                                 --conf spark.dynamicAllocation.enabled=false
                                 --conf spark.archives=s3://${DeploymentZone}/weather_etl/pyspark_env.tar.gz#environment
-
                               "
                         }
                       },
