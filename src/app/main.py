@@ -78,6 +78,7 @@ def main(spark = SparkSession.builder.getOrCreate()):
 
     df = (
         spark.read
+        .option("url", jdbc_url)
         .option("user", db_username)
         .option("password", db_password)
         .option("driver", "org.postgresql.Driver")
