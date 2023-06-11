@@ -12,6 +12,39 @@ permissions:
   contents: read
 
 jobs:
+
+  # deploy_python311_image:
+  #   name: Deploy Docker Image
+  #   runs-on: ubuntu-latest
+  #   environment: production
+  #   container:
+  #     image: public.ecr.aws/sam/build-python3.7:latest
+    
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v3
+
+  #     - name: Configure AWS credentials
+  #       uses: aws-actions/configure-aws-credentials@v1
+  #       with:
+  #         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  #         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  #         aws-region: ${{ env.AWS_REGION }}
+
+  #     - name: build and push
+  #       uses: vitr/actions-build-and-upload-to-ecs@master
+  #       with:
+  #         dockerfile: BaseDockerfile
+  #         access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  #         secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  #         account_id: ${{ env.AWS_ACCOUNT_ID }}
+  #         repo: emr-610/python-311
+  #         region: ${{ env.AWS_REGION }}
+  #         tags: latest
+  #         create_repo: false
+
+
+
   deploy_docker_image:
     name: Deploy Docker Image
     runs-on: ubuntu-latest

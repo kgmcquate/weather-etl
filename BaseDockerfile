@@ -1,0 +1,16 @@
+FROM public.ecr.aws/emr-serverless/spark/emr-6.10.0:latest
+
+USER root
+
+RUN yum install gcc openssl-devel bzip2-devel libffi-devel wget -y
+
+RUN wget https://www.python.org/ftp/python/3.11.4/Python-3.11.4.tgz && \
+    tar xzf Python-3.11.4.tgz && \
+    cd Python-3.11.4/ && \
+    ./configure --enable-optimizations && \
+    make altinstall && \
+    rm -f Python-3.11.4.tgz
+
+RUN yum remove gcc openssl-devel bzip2-devel libffi-devel wget -y
+
+USER hadoop:hadoop
