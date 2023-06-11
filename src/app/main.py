@@ -74,7 +74,7 @@ def main(spark = SparkSession.builder.getOrCreate()):
 
     jdbc_url = f"jdbc:postgresql://{db_endpoint}"
 
-    print(f"{jdbc_url=}")
+    print(jdbc_url)
 
     df = (
         spark.read
