@@ -72,7 +72,7 @@ class WeatherRequest:
         daily_weathers = [] # : list[DailyWeather] 
         for i, date in enumerate(daily_data["time"]):
             features_dict = {}
-            for feature in features:
+            for feature in self.features:
                 features_dict[feature] = daily_data[feature][i]
 
             daily_weathers.append(
