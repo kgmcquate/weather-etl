@@ -164,7 +164,7 @@ jobs:
       run: sam build
       
     - name: SAM deploy
-      run: sam deploy
+      run: sam deploy --no-fail-on-empty-changeset
 
 
     # - name: SAM build
