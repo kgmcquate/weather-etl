@@ -19,8 +19,6 @@ features = [feature.name for feature in dataclasses.fields(DailyWeather) if feat
 
 import logging
 
-logger = logging.basicConfig(level=logging.DEBUG)
-
 @dataclass
 class WeatherRequest:
     start_date: datetime.date
@@ -81,7 +79,7 @@ def get_jdbc_options():
     from .database import db_endpoint, db_password, db_username
     jdbc_url = f"jdbc:postgresql://{db_endpoint}:5432/"
 
-    logger.debug(jdbc_url)
+    # logger.debug(jdbc_url)
 
     return {
         "dbtable": lakes_table_name,
@@ -99,6 +97,8 @@ def main(
 
     ):
     from pyspark.sql.functions import col, lit, max, min
+
+    logger = logging.basicConfig(level=logging.DEBUG)
     
     start_date = current_date - datetime.timedelta(days=lookback_days)
     weather_dates = [current_date - datetime.timedelta(days=x) for x in range(lookback_days) ]
