@@ -78,6 +78,7 @@ def main(spark = SparkSession.builder.getOrCreate()):
 
     df = (
         spark.read
+        .option("dbtable", "lakes")
         .option("url", jdbc_url)
         .option("user", db_username)
         .option("password", db_password)
