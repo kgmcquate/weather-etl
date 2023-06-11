@@ -154,6 +154,8 @@ def main(
             min(col("date")).alias("start_date"),
             max(col("date")).alias("end_date")
         )
+        # TODO remove limit for prod
+        .limit(10)
         # Turn into API requests
         .rdd
         .map(lambda row: WeatherRequest(**row.asDict()))
