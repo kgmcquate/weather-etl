@@ -124,7 +124,7 @@ def main(
     )
 
     if logger.isEnabledFor(logging.DEBUG):
-        latlngs_df.show()
+        latlngs_df.cache().show()
 
     from pyspark.sql.types import StructType, StructField, DateType, StringType, FloatType
 
@@ -136,7 +136,7 @@ def main(
     )
 
     if logger.isEnabledFor(logging.DEBUG):
-        latlngs_df.show()
+        needed_dates_df.cache().show()
 
 
     weathers_needed = latlngs_df.crossJoin(needed_dates_df)
@@ -164,7 +164,12 @@ def main(
         # Send request to API
         # Each request turns a list of weathers, so flatMap
         .flatMap(lambda req: req.get_weather_data())
+        .map(lambda x: x.__dict__)
     )
+
+    if logger.isEnabledFor(logging.DEBUG):
+        weathers_rdd.cache()
+        print(weathers_rdd.take(10))
 
     # def get_pyspark_type(the_type):
     #     if the_type == float:
