@@ -1,11 +1,8 @@
 import os, json, boto3
 from pyspark.sql import SparkSession
+from pyspark.sql.types import StructType, StructField, DateType, StringType, FloatType
 import dataclasses
 import datetime
-from dataclasses import dataclass
-from urllib.parse import urlencode
-import requests
-import pprint
 # import database
 
 api_url = "api.open-meteo.com/v1/"
@@ -13,67 +10,9 @@ DEFAULT_LOOKBACK_DAYS = 365
 lakes_table_name = "lakes"
 weather_by_day_table_name = "weather_by_day"
 
-from .data_models import DailyWeather
-
-features = [feature.name for feature in dataclasses.fields(DailyWeather) if feature.name not in ("date", "latitude", "longitude", "timezone")]
-
+from .data_models import DailyWeather, WeatherRequest
 import logging
 
-@dataclass
-class WeatherRequest:
-    start_date: datetime.date
-    end_date:  datetime.date
-    latitude: float
-    longitude: float
-
-    features = features
-    api_url = api_url
-
-    def __post_init__(self):
-
-        pass
-
-    def _get_request_params(self): # -> dict[str, str]
-        return {
-            "daily": ','.join(self.features),
-            "start_date": self.start_date.isoformat(),
-            "end_date": self.end_date.isoformat(),
-            "latitude": self.latitude,
-            "longitude": self.longitude,
-            "timezone": "auto" # The local timezone
-        }
-
-    def _get_request_url(self): #  -> str
-        return f"https://{self.api_url}forecast?{urlencode(self._get_request_params())}"
-    
-    def _send_request(self):
-        return requests.get(url=self._get_request_url())
-
-    def get_weather_data(self): # -> list[DailyWeather]
-        response = self._send_request().json()
-
-        daily_data = response["daily"] # : dict[str, list]
-        local_tz = response["timezone"] # : str 
-
-        daily_weathers = [] # : list[DailyWeather] 
-        for i, date in enumerate(daily_data["time"]):
-            features_dict = {}
-            for feature in features:
-                features_dict[feature] = daily_data[feature][i]
-
-            daily_weathers.append(
-                DailyWeather(
-                    date=date,
-                    latitude=self.latitude,
-                    longitude=self.longitude,
-                    timezone=local_tz,
-                    **features_dict
-                )
-            )
-
-        return daily_weathers
-
-    
 
 def get_jdbc_options():
     from .database import db_endpoint, db_password, db_username
@@ -126,13 +65,13 @@ def main(
     if logger.isEnabledFor(logging.DEBUG):
         latlngs_df.cache().show()
 
-    from pyspark.sql.types import StructType, StructField, DateType, StringType, FloatType
 
     needed_dates_df = (
         spark.createDataFrame(
             [[d] for d in weather_dates],
             schema=StructType().add(field="date", data_type=DateType())
         )
+        .hint("broadcast")
     )
 
     if logger.isEnabledFor(logging.DEBUG):
@@ -179,7 +118,7 @@ def main(
 
     # daily_weather_schema = [StructField(name=name, dataType=) for name, python_type in DailyWeather.__annotations__.items()]
 
-    new_weathers = spark.createDataFrame(weathers_rdd)
+    new_weathers = weathers_rdd.toDF()
 
     new_weathers.show()
 
