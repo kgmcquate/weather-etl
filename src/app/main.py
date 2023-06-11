@@ -98,7 +98,8 @@ def main(
     ):
     from pyspark.sql.functions import col, lit, max, min
 
-    logger = logging.basicConfig(level=logging.DEBUG)
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.DEBUG)
     
     start_date = current_date - datetime.timedelta(days=lookback_days)
     weather_dates = [current_date - datetime.timedelta(days=x) for x in range(lookback_days) ]
