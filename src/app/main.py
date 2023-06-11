@@ -82,7 +82,6 @@ def get_jdbc_options():
     # logger.debug(jdbc_url)
 
     return {
-        "dbtable": lakes_table_name,
         "url": jdbc_url,
         "user": db_username,
         "password": db_password,
