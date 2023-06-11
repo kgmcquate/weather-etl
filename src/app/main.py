@@ -74,7 +74,7 @@ def main(spark = SparkSession.builder.getOrCreate()):
 
     jdbc_url = f"jdbc:postgresql://{db_endpoint}"
 
-    df = spark.read.jdbc(jdbc_url, "lakes", {"user": db_username, "password": db_password})
+    df = spark.read.jdbc(jdbc_url, "lakes", properties={"user": db_username, "password": db_password})
 
     df.show()
 
