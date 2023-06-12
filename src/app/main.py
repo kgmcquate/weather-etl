@@ -29,7 +29,7 @@ def main(
         lookback_days: int = DEFAULT_LOOKBACK_DAYS,
 
     ):
-    from pyspark.sql.functions import col, lit, max, min
+    from pyspark.sql.functions import col, lit, max, min, coalesce
 
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.DEBUG)
@@ -43,7 +43,10 @@ def main(
         .options(**get_jdbc_options())
         .format("jdbc")
         .load()
-        .select("latitude", "longitude")
+        .select(
+            coalesce("latitude", "nearby_city_latitude").alias("latitude"), 
+            coalesce("longitude", "nearby_city_longitude").alias("longitude")
+        )
         .distinct() # Some locations have the same lat/long
     )
 
