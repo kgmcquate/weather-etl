@@ -6,7 +6,7 @@ from urllib.parse import urlencode
 import requests
 import pprint
 
-from .main import api_url
+from .config import api_url
 
 @dataclass
 class DailyWeather:

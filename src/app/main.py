@@ -4,13 +4,8 @@ from pyspark.sql.types import StructType, StructField, DateType, StringType, Flo
 import dataclasses
 import datetime
 # import database
-
-api_url = "api.open-meteo.com/v1/"
-DEFAULT_LOOKBACK_DAYS = 365
-lakes_table_name = "lakes"
-weather_by_day_table_name = "weather_by_day"
-
-from .data_models import DailyWeather, WeatherRequest
+from .config import DEFAULT_LOOKBACK_DAYS, lakes_table_name, weather_by_day_table_name
+from .data_models import WeatherRequest
 import logging
 
 
