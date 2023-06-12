@@ -28,7 +28,7 @@ class DailyWeather:
     precipitation_probability_max: float
     windspeed_10m_max: float
     windgusts_10m_max: float
-    winddirection_10m_dominant: float
+    winddirection_10m_dominant: int
     shortwave_radiation_sum: float
     et0_fao_evapotranspiration: float
 
