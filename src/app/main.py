@@ -1,11 +1,11 @@
 import os, json, boto3
 from pyspark.sql import SparkSession
-from pyspark.sql.types import StructType, StructField, DateType, StringType, FloatType
+from pyspark.sql.types import StructType, StructField, DateType, StringType, FloatType, IntegerType
 import dataclasses
 import datetime
 # import database
 from .config import DEFAULT_LOOKBACK_DAYS, lakes_table_name, weather_by_day_table_name
-from .data_models import WeatherRequest
+from .data_models import DailyWeather, WeatherRequest
 import logging
 
 
@@ -105,15 +105,17 @@ def main(
         weathers_rdd.cache()
         print(weathers_rdd.take(10))
 
-    # def get_pyspark_type(the_type):
-    #     if the_type == float:
-    #         return FloatType()
-    #     elif the_type == str:
-    #         return StringType()
+    def get_pyspark_type(the_type):
+        return {
+            float: FloatType(),
+            int: IntegerType(),
+            str: StringType(),
+            datetime.date: DateType()
+        }[the_type]
 
-    # daily_weather_schema = [StructField(name=name, dataType=) for name, python_type in DailyWeather.__annotations__.items()]
+    daily_weather_schema = StructType([StructField(name=name, dataType=get_pyspark_type(python_type)) for name, python_type in DailyWeather.__annotations__.items()])
 
-    new_weathers = weathers_rdd.toDF()
+    new_weathers = weathers_rdd.toDF(schema=daily_weather_schema)
 
     new_weathers.show()
 
