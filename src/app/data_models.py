@@ -43,10 +43,6 @@ class WeatherRequest:
     features = [feature.name for feature in dataclasses.fields(DailyWeather) if feature.name not in ("date", "latitude", "longitude", "timezone")]
     api_url = api_url
 
-    def __post_init__(self):
-
-        pass
-
     def _get_request_params(self): # -> dict[str, str]
         return {
             "daily": ','.join(self.features),
