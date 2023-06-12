@@ -1,6 +1,6 @@
 import os, json, boto3
 from pyspark.sql import SparkSession
-from pyspark.sql.types import StructType, StructField, DateType, StringType, FloatType, IntegerType
+from pyspark.sql.types import StructType, StructField, DateType, StringType, FloatType, IntegerType, TimestampType
 import dataclasses
 import datetime
 # import database
@@ -115,9 +115,25 @@ def main(
 
     daily_weather_schema = StructType([StructField(name=name, dataType=get_pyspark_type(python_type)) for name, python_type in DailyWeather.__annotations__.items()])
 
-    new_weathers = weathers_rdd.toDF(schema=daily_weather_schema).withColumn("date", col("date").cast(DateType()))
+    new_weathers = (
+        weathers_rdd.toDF(schema=daily_weather_schema)
+        .withColumn("date", col("date").cast(DateType()))
+        .withColumn("sunrise", col("sunrise").cast(TimestampType()))
+        .withColumn("sunset", col("sunset").cast(TimestampType()))
+    )
 
-    new_weathers.show()
+    if logger.isEnabledFor(logging.DEBUG):
+        new_weathers.cache()
+        new_weathers.show()
+
+    (
+        new_weathers.write
+        .option("dbtable", "daily_weather")
+        .options(**get_jdbc_options())
+        .format("jdbc")
+        .mode("append")
+        .save()
+    )
 
 
     # req = WeatherRequest(
