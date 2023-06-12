@@ -25,12 +25,15 @@ class DailyWeather:
     showers_sum: float
     snowfall_sum: float
     precipitation_hours: float
-    precipitation_probability_max: float
+    precipitation_probability_max: int
     windspeed_10m_max: float
     windgusts_10m_max: float
     winddirection_10m_dominant: int
     shortwave_radiation_sum: float
     et0_fao_evapotranspiration: float
+
+    def __post_init__(self):
+        pass
 
 
 @dataclass
