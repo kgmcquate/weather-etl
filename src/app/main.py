@@ -115,7 +115,7 @@ def main(
 
     daily_weather_schema = StructType([StructField(name=name, dataType=get_pyspark_type(python_type)) for name, python_type in DailyWeather.__annotations__.items()])
 
-    new_weathers = weathers_rdd.toDF(schema=daily_weather_schema)
+    new_weathers = weathers_rdd.toDF(schema=daily_weather_schema).withColumn("date", col("date").cast(DateType()))
 
     new_weathers.show()
 

@@ -10,7 +10,7 @@ from .config import api_url
 
 @dataclass
 class DailyWeather:
-    date: datetime.date
+    date: str
     latitude: float
     longitude: float
     timezone: str
