@@ -77,11 +77,10 @@ Resources:
                                 --executor-cores 2
                                 --conf spark.dynamicAllocation.enabled=false
                                 --conf spark.archives=s3://${DeploymentZone}/weather_etl/pyspark_env.tar.gz#environment
-                              "
-                                                              
-                                --conf spark.emr-serverless.driverEnv.PYSPARK_DRIVER_PYTHON=./environment/bin/python
-                                --conf spark.emr-serverless.driverEnv.PYSPARK_PYTHON=./environment/bin/python 
+                                -conf spark.emr-serverless.driverEnv.PYSPARK_PYTHON=./environment/bin/python 
                                 --conf spark.executorEnv.PYSPARK_PYTHON=./environment/bin/python
+                                --conf spark.emr-serverless.driverEnv.PYSPARK_DRIVER_PYTHON=./environment/bin/python
+                              "
                               # --conf spark.jars.packages=org.postgresql:postgresql:42.6.0
                         }
                       },
