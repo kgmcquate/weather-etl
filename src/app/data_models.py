@@ -11,8 +11,8 @@ from .config import api_url
 @dataclass
 class DailyWeather:
     date: str
-    latitude: float
-    longitude: float
+    latitude: str
+    longitude: str
     timezone: str
     temperature_2m_max: float
     temperature_2m_min: float
@@ -40,8 +40,8 @@ class DailyWeather:
 class WeatherRequest:
     start_date: datetime.date
     end_date:  datetime.date
-    latitude: float
-    longitude: float
+    latitude: str
+    longitude: str
 
     features = [feature.name for feature in dataclasses.fields(DailyWeather) if feature.name not in ("date", "latitude", "longitude", "timezone")]
     api_url = api_url
@@ -51,8 +51,8 @@ class WeatherRequest:
             "daily": ','.join(self.features),
             "start_date": self.start_date.isoformat(),
             "end_date": self.end_date.isoformat(),
-            "latitude": self.latitude,
-            "longitude": self.longitude,
+            "latitude": float(self.latitude),
+            "longitude": float(self.longitude),
             "timezone": "auto" # The local timezone
         }
 
