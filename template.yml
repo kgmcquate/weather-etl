@@ -14,6 +14,18 @@ Parameters:
     Type: String
     Default: emr-zone-117819748843-us-east-1
 
+  DockerImageUri:
+    Type: String
+    Default: 117819748843.dkr.ecr.us-east-1.amazonaws.com/weather-etl/pyspark-env:latest
+
+  SecurityGroupIds:
+    Type: CommaDelimitedList
+    Default: sg-06ccb1d8e6918a05c
+
+  SubnetIds:
+    Type: CommaDelimitedList
+    Default: subnet-07e2023c25351b29b
+
 Resources:
   ETLJobTrigger:
     Type: AWS::Events::Rule
@@ -36,7 +48,7 @@ Resources:
     Type: AWS::EMRServerless::Application
     Properties: 
       Name: WeatherETLApplication
-      Architecture: ARM64
+      Architecture: X86_64
       AutoStartConfiguration: 
         Enabled: true
       AutoStopConfiguration: 
@@ -48,6 +60,12 @@ Resources:
         Memory: 16GB
       ReleaseLabel: "emr-6.10.0"
       Type: Spark
+      ImageConfiguration:
+        ImageUri: !Ref DockerImageUri
+      NetworkConfiguration:
+        SecurityGroupIds: !Ref SecurityGroupIds
+        SubnetIds: !Ref SubnetIds
+
   
   StepFunctionStateMachine:
     Type: AWS::StepFunctions::StateMachine
@@ -76,12 +94,8 @@ Resources:
                                 --executor-memory 2G
                                 --executor-cores 2
                                 --conf spark.dynamicAllocation.enabled=false
-                                --conf spark.archives=s3://${DeploymentZone}/weather_etl/pyspark_env.tar.gz#environment
-                                -conf spark.emr-serverless.driverEnv.PYSPARK_PYTHON=./environment/bin/python 
-                                --conf spark.executorEnv.PYSPARK_PYTHON=./environment/bin/python
-                                --conf spark.emr-serverless.driverEnv.PYSPARK_DRIVER_PYTHON=./environment/bin/python
+                                --jars https://repo1.maven.org/maven2/org/postgresql/postgresql/42.6.0/postgresql-42.6.0.jar
                               "
-                              # --conf spark.jars.packages=org.postgresql:postgresql:42.6.0
                         }
                       },
                       "ConfigurationOverrides": {
@@ -98,9 +112,49 @@ Resources:
             }
         }
 
+# --jars https://repo1.maven.org/maven2/org/postgresql/postgresql/42.6.0/postgresql-42.6.0.jar
+                                # --jars https://repo1.maven.org/maven2/org/postgresql/postgresql/42.6.0/postgresql-42.6.0.jar
       
+                                # --conf spark.archives=s3://${DeploymentZone}/weather_etl/pyspark_env.tar.gz#environment
+                                # --conf spark.emr-serverless.driverEnv.PYSPARK_DRIVER_PYTHON=/home/hadoop/environment/bin/python3
+                                # --conf spark.emr-serverless.driverEnv.PYSPARK_PYTHON=/home/hadoop/environment/bin/python3
+                                # --conf spark.executorEnv.PYSPARK_PYTHON=/home/hadoop/environment/bin/python3
+  ECRRepository:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: "weather-etl/pyspark-env"
+      RepositoryPolicyText: {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Sid": "Emr Serverless Custom Image Support",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "emr-serverless.amazonaws.com"
+              },
+              "Action": [
+                "ecr:BatchGetImage",
+                "ecr:DescribeImages",
+                "ecr:GetDownloadUrlForLayer"
+              ]
+            }
+          ]
+        }
 
-
-
-
-            
+  BaseECRRepository:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: "emr-610/python-311"
+      RepositoryPolicyText: {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Sid": "Emr Serverless Custom Image Support",
+              "Effect": "Allow",
+              "Principal": "*",
+              "Action": [
+                "ecr:*"
+              ]
+            }
+          ]
+        }

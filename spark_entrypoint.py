@@ -1,7 +1,6 @@
 
 from pyspark.sql import SparkSession
 
+from app.main import main
 
-import app
-
-app.main()
+main()
