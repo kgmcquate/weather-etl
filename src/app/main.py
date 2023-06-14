@@ -131,9 +131,11 @@ def main(
         new_weathers.cache()
         new_weathers.show()
 
+
+    # TODO write to stage table and merge to avoid conflicts from live updates from the API
     (
         new_weathers.write
-        .option("dbtable", "daily_weather")
+        .option("dbtable", weather_by_day_table_name)
         .options(**get_jdbc_options())
         .format("jdbc")
         .mode("append")
