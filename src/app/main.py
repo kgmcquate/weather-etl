@@ -114,7 +114,8 @@ def main(
     weathers_rdd = (
         responses_rdd
         .filter(lambda x: isinstance(x, list))
-        .flatMap(lambda x: x.__dict__)
+        .flatMap(lambda x: x)
+        .map(lambda x: x.__dict__)
     )
 
 
