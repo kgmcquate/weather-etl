@@ -5,6 +5,7 @@ import dataclasses
 from urllib.parse import urlencode
 import requests
 import pprint
+from urllib3.util import Retry
 
 from .config import api_url
 
@@ -60,7 +61,11 @@ class WeatherRequest:
         return f"https://{self.api_url}forecast?{urlencode(self._get_request_params())}"
     
     def _send_request(self):
-        return requests.get(url=self._get_request_url())
+        retries = Retry(10)
+        # return http.request(
+        #     "GET", "https://example.com/", retries=Retry(10))
+
+        return requests.get(url=self._get_request_url(), retries=Retry(2, backoff_factor=0.3))
 
     def get_weather_data(self): # -> list[DailyWeather]
         response = self._send_request().json()
