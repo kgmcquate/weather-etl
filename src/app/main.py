@@ -91,6 +91,8 @@ def main(
             min(col("date")).alias("start_date"),
             max(col("date")).alias("end_date")
         )
+        # Limit for testing
+        .limit(100)
         # Turn into API requests
         .rdd
         .map(lambda row: WeatherRequest(**row.asDict()))
