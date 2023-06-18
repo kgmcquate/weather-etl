@@ -68,25 +68,28 @@ class WeatherRequest:
         return requests.get(url=self._get_request_url())
 
     def get_weather_data(self): # -> list[DailyWeather]
-        response = self._send_request().json()
+        try:
+            response = self._send_request().json()
 
-        daily_data = response["daily"] # : dict[str, list]
-        local_tz = response["timezone"] # : str 
+            daily_data = response["daily"] # : dict[str, list]
+            local_tz = response["timezone"] # : str 
 
-        daily_weathers = [] # : list[DailyWeather] 
-        for i, date in enumerate(daily_data["time"]):
-            features_dict = {}
-            for feature in self.features:
-                features_dict[feature] = daily_data[feature][i]
+            daily_weathers = [] # : list[DailyWeather] 
+            for i, date in enumerate(daily_data["time"]):
+                features_dict = {}
+                for feature in self.features:
+                    features_dict[feature] = daily_data[feature][i]
 
-            daily_weathers.append(
-                DailyWeather(
-                    date=date,
-                    latitude=self.latitude,
-                    longitude=self.longitude,
-                    timezone=local_tz,
-                    **features_dict
+                daily_weathers.append(
+                    DailyWeather(
+                        date=date,
+                        latitude=self.latitude,
+                        longitude=self.longitude,
+                        timezone=local_tz,
+                        **features_dict
+                    )
                 )
-            )
 
-        return daily_weathers
+            return daily_weathers
+        except Exception as e:
+            return Exception(f"Error getting weather data for {self}", e)

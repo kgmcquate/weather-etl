@@ -82,17 +82,18 @@ def main(
     weathers_to_get = (
         weathers_needed
         .join(weather_days_df, ["latitude", "longitude", "date"], "leftanti")
-    )
-
-    
-    weathers_rdd = (
         # Get the start and end times for each location, since the API takes a lat/lng and date range
-        weathers_to_get.groupBy("latitude", "longitude").agg(
+        .groupBy("latitude", "longitude").agg(
             min(col("date")).alias("start_date"),
             max(col("date")).alias("end_date")
         )
+    )
+
+
+    weathers_rdd = (
+        weathers_to_get
         # Limit for testing
-        # .limit(100)
+        .limit(1000)
         # Turn into API requests
         .rdd
         .map(lambda row: WeatherRequest(**row.asDict()))
@@ -101,8 +102,18 @@ def main(
         # Send request to API
         # Each request turns a list of weathers, so flatMap
         .flatMap(lambda req: req.get_weather_data())
-        .map(lambda x: x.__dict__)
     )
+
+    errors = weathers_rdd.filter(lambda x: isinstance(x, Exception))   
+    if logger.isEnabledFor(logging.DEBUG):
+        errors.cache()
+        print(errors.take(100))
+
+    
+    weathers_rdd = weathers_rdd.filter(lambda x: not isinstance(x, Exception))
+    
+    weathers_rdd = weathers_rdd.map(lambda x: x.__dict__)
+
 
     if logger.isEnabledFor(logging.DEBUG):
         weathers_rdd.cache()
