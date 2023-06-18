@@ -4,7 +4,7 @@ from pyspark.sql.types import StructType, StructField, DateType, StringType, Flo
 import dataclasses
 import datetime
 # import database
-from .config import DEFAULT_LOOKBACK_DAYS, lakes_table_name, weather_by_day_table_name
+from .config import DEFAULT_LOOKBACK_DAYS, API_PARALLELISM, lakes_table_name, weather_by_day_table_name
 from .data_models import DailyWeather, WeatherRequest
 import logging
 
@@ -95,7 +95,7 @@ def main(
         .rdd
         .map(lambda row: WeatherRequest(**row.asDict()))
         # Only run 5 requests concurrently
-        .coalesce(5)
+        .coalesce(API_PARALLELISM)
         # Send request to API
         # Each request turns a list of weathers, so flatMap
         .flatMap(lambda req: req.get_weather_data())
