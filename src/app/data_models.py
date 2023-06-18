@@ -65,7 +65,7 @@ class WeatherRequest:
         # return http.request(
         #     "GET", "https://example.com/", retries=Retry(10))
 
-        return requests.get(url=self._get_request_url(), retries=Retry(2, backoff_factor=0.3))
+        return requests.get(url=self._get_request_url())
 
     def get_weather_data(self): # -> list[DailyWeather]
         response = self._send_request().json()
