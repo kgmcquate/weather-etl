@@ -90,10 +90,10 @@ def main(
     )
 
 
-    weathers_rdd = (
+    responses_rdd = (
         weathers_to_get
         # Limit for testing
-        .limit(1000)
+        .limit(10)
         # Turn into API requests
         .rdd
         .map(lambda row: WeatherRequest(**row.asDict()))
@@ -101,18 +101,20 @@ def main(
         .coalesce(API_PARALLELISM)
         # Send request to API
         # Each request turns a list of weathers, so flatMap
-        .flatMap(lambda req: req.get_weather_data())
+        .map(lambda req: req.get_weather_data())
     )
 
-    errors = weathers_rdd.filter(lambda x: isinstance(x, Exception))   
+    errors = responses_rdd.filter(lambda x: isinstance(x, Exception))
     if logger.isEnabledFor(logging.DEBUG):
         errors.cache()
         print(errors.take(100))
 
     
-    weathers_rdd = weathers_rdd.filter(lambda x: not isinstance(x, Exception))
-    
-    weathers_rdd = weathers_rdd.map(lambda x: x.__dict__)
+    weathers_rdd = (
+        responses_rdd
+        .filter(lambda x: isinstance(x, list))
+        .flatMap(lambda x: x.__dict__)
+    )
 
 
     if logger.isEnabledFor(logging.DEBUG):
