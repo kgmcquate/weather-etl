@@ -107,8 +107,10 @@ def main(
     errors = responses_rdd.filter(lambda x: isinstance(x, Exception))
     if logger.isEnabledFor(logging.DEBUG):
         errors.cache()
-        print("Errors:")
-        print(errors.take(100))
+        cnt = errors.count()
+        if cnt > 0:
+            print(f"{str(cnt)} Errors:")
+            print(errors.take(100))
 
     
     weathers_rdd = (

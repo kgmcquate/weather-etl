@@ -6,6 +6,7 @@ from urllib.parse import urlencode
 import requests
 import pprint
 from urllib3.util import Retry
+import time
 
 from .config import api_url
 
@@ -61,10 +62,12 @@ class WeatherRequest:
         return f"https://{self.api_url}forecast?{urlencode(self._get_request_params())}"
     
     def _send_request(self):
-        retries = Retry(10)
+        # retries = Retry(10)
         # return http.request(
         #     "GET", "https://example.com/", retries=Retry(10))
 
+        time.sleep(0.1)
+        
         return requests.get(url=self._get_request_url())
 
     def get_weather_data(self): # -> list[DailyWeather]
