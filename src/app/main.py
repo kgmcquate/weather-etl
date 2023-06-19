@@ -93,7 +93,7 @@ def main(
     responses_rdd = (
         weathers_to_get
         # Limit for testing
-        .limit(10)
+        .limit(1000)
         # Turn into API requests
         .rdd
         .map(lambda row: WeatherRequest(**row.asDict()))
