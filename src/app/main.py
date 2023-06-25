@@ -93,7 +93,7 @@ def main(
     responses_rdd = (
         weathers_to_get
         # Limit for testing
-        .limit(1000)
+        # .limit(1000)
         # Turn into API requests
         .rdd
         .map(lambda row: WeatherRequest(**row.asDict()))
@@ -109,8 +109,8 @@ def main(
         errors.cache()
         cnt = errors.count()
         if cnt > 0:
-            print(f"{str(cnt)} Errors:")
-            print(errors.take(100))
+            logger.debug(f"{str(cnt)} Errors:")
+            logger.debug(errors.take(100))
 
     
     weathers_rdd = (
@@ -123,7 +123,7 @@ def main(
 
     if logger.isEnabledFor(logging.DEBUG):
         weathers_rdd.cache()
-        print(weathers_rdd.take(10))
+        logger.debug(weathers_rdd.take(10))
 
     def get_pyspark_type(the_type):
         return {
@@ -148,6 +148,8 @@ def main(
 
     if logger.isEnabledFor(logging.DEBUG):
         new_weathers.cache()
+        cnt = new_weathers.count()
+        logger.debug(f"Number of successful results: {cnt}")
         new_weathers.show()
 
 
