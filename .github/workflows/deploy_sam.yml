@@ -42,6 +42,9 @@ jobs:
       image: public.ecr.aws/sam/build-python3.7:latest #public.ecr.aws/emr-serverless/spark/emr-6.10.0:latest
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        
       - uses: actions/download-artifact@master
         with:
           name: python_package
@@ -101,7 +104,7 @@ jobs:
       run: sam build
 
     - name: SAM validate
-      run: sam validate --region ${{ env.AWS_REGION }}
+      run: sam validate --list --region ${{ env.AWS_REGION }}
 
     - name: Configure AWS credentials
       if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
