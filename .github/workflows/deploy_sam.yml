@@ -39,21 +39,22 @@ jobs:
     name: test python package
     runs-on: ubuntu-latest
     container:
-      image: public.ecr.aws/sam/build-python3.7:latest #public.ecr.aws/emr-serverless/spark/emr-6.10.0:latest
+      image: public.ecr.aws/sam/build-python3.7:latest # public.ecr.aws/emr-serverless/spark/emr-6.10.0:latest
 
     steps:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - uses: actions/download-artifact@master
-        with:
-          name: python_package
-          path: dist/
+      # - uses: actions/download-artifact@master
+      #   with:
+      #     name: python_package
+      #     path: dist/
 
       - name: Test python package
         run: |
           pip install pytest pyspark
-          pip install ./dist/*
+          # pip install ./dist/*
+          pip install -r src/app/requirements.txt
           python -m pytest
 
   deploy:
