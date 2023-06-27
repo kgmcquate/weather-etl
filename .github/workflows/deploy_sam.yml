@@ -14,11 +14,11 @@ env:
 
 jobs:
   build:
-    name: Build, test, and deploy python package
+    name: Build python package
     runs-on: ubuntu-latest
     container:
-      image: public.ecr.aws/emr-serverless/spark/emr-6.10.0:latest
-      
+      image: public.ecr.aws/sam/build-python3.7:latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -28,15 +28,40 @@ jobs:
           pip install venv-pack awscli build
           python -m build --sdist ./
 
+      - uses: actions/upload-artifact@master
+        with:
+          name: python_package
+          path: dist/
+
+  test:
+    needs: build
+    name: test python package
+    runs-on: ubuntu-latest
+    container:
+      image: public.ecr.aws/emr-serverless/spark/emr-6.10.0:latest
+
+    steps:
+      - uses: actions/download-artifact@master
+        with:
+          name: python_package
+          path: dist/
+
       - name: Test python package
         run: |
           pip install pytest
           pip install ./dist/*
           python -m pytest
 
+  deploy:
+    needs: test
+    name: Deploy python package
+    runs-on: ubuntu-latest
+    container:
+      image: public.ecr.aws/sam/build-python3.7:latest
 
+    if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+    steps:
       - name: Configure AWS credentials
-        if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -44,7 +69,6 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Push to ECR
-        if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
         uses: vitr/actions-build-and-upload-to-ecs@master
         with:
           access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -57,7 +81,6 @@ jobs:
          
 
       - name: Copy Python files to S3 deployment zone
-        if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
         run: |
           aws s3 cp spark_entrypoint.py s3://deployment-zone-${AWS_ACCOUNT_ID}/weather_etl/
     
