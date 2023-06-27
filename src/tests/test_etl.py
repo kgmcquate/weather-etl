@@ -6,7 +6,7 @@ from chispa.dataframe_comparer import assert_df_equality
 
 from pyspark.sql import SparkSession
 # from your_module import main
-from .app.main import transform
+from app.main import transform
 
 
 # def get_test_jdbc_options():

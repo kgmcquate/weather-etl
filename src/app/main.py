@@ -1,6 +1,7 @@
-import os, json, boto3
-from pyspark.sql import SparkSession
+import os, sys, json, boto3
+from pyspark.sql import SparkSession, DataFrame
 from pyspark.sql.types import StructType, StructField, DateType, StringType, FloatType, IntegerType, TimestampType
+from pyspark.sql.functions import col, lit, max, min, coalesce
 import dataclasses
 import datetime
 # import database
@@ -8,6 +9,9 @@ from .config import DEFAULT_LOOKBACK_DAYS, API_PARALLELISM, lakes_table_name, we
 from .data_models import DailyWeather, WeatherRequest
 import logging
 
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.StreamHandler(sys.stdout))
+logger.setLevel(logging.DEBUG)
 
 def get_jdbc_options():
     from .database import db_endpoint, db_password, db_username
@@ -22,27 +26,20 @@ def get_jdbc_options():
         "driver": "org.postgresql.Driver"
     }
 
-
-def main(
-        spark = SparkSession.builder.getOrCreate(),
+def transform(
+        lakes_table_df: DataFrame, 
+        daily_weather_table_df: DataFrame,
         current_date: datetime.date = datetime.date.today(),
-        lookback_days: int = DEFAULT_LOOKBACK_DAYS,
+        lookback_days: int = DEFAULT_LOOKBACK_DAYS
+    ) -> DataFrame:
 
-    ):
-    from pyspark.sql.functions import col, lit, max, min, coalesce
+    spark = SparkSession.getActiveSession()
 
-    logger = logging.getLogger(__name__)
-    logger.setLevel(logging.DEBUG)
-    
     start_date = current_date - datetime.timedelta(days=lookback_days)
     weather_dates = [current_date - datetime.timedelta(days=x) for x in range(lookback_days) ]
-
+     
     latlngs_df = (
-        spark.read
-        .option("dbtable", lakes_table_name)
-        .options(**get_jdbc_options())
-        .format("jdbc")
-        .load()
+        lakes_table_df
         .select(
             coalesce("latitude", "nearby_city_latitude").alias("latitude"), 
             coalesce("longitude", "nearby_city_longitude").alias("longitude")
@@ -51,11 +48,7 @@ def main(
     )
 
     weather_days_df = (
-        spark.read
-        .option("dbtable", weather_by_day_table_name)
-        .options(**get_jdbc_options())
-        .format("jdbc")
-        .load()
+        daily_weather_table_df
         .select("date", "latitude", "longitude")
         .filter(col("date") >= lit(start_date.isoformat()) )
     )
@@ -73,6 +66,7 @@ def main(
     )
 
     if logger.isEnabledFor(logging.DEBUG):
+        logger.debug(f"Dates needed:")
         needed_dates_df.cache().show()
 
 
@@ -152,6 +146,35 @@ def main(
         logger.debug(f"Number of successful results: {cnt}")
         new_weathers.show()
 
+    return new_weathers
+
+
+def main(
+        spark = SparkSession.builder.getOrCreate()
+    ):
+    
+    lakes_table_df = (
+        spark.read
+        .option("dbtable", lakes_table_name)
+        .options(**get_jdbc_options())
+        .format("jdbc")
+        .load()
+    )
+
+    daily_weather_table_df = (
+        spark.read
+        .option("dbtable", weather_by_day_table_name)
+        .options(**get_jdbc_options())
+        .format("jdbc")
+        .load()
+    )
+
+    new_weathers = transform(
+        lakes_table_df=lakes_table_df,
+        daily_weather_table_df=daily_weather_table_df
+    )
+
+   
 
     # TODO write to stage table and merge to avoid conflicts from live updates from the API
     (
@@ -162,25 +185,3 @@ def main(
         .mode("append")
         .save()
     )
-
-
-    # req = WeatherRequest(
-    #     start_date=datetime.date.fromisoformat("2023-01-01"),
-    #     end_date=datetime.date.fromisoformat("2023-01-07"),
-    #     latitude=52.52,
-    #     longitude=13.419998
-    # )
-
-    # pprint.pprint(
-    #     req.get_weather_data()
-    # )
-
-
-
-
-
-# url = "https://api.open-meteo.com/v1/forecast?latitude=52.52&longitude=13.41&daily=
-# temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max,uv_index_clear_sky_max,precipitation_sum,rain_sum,showers_sum,snowfall_sum,precipitation_hours,precipitation_probability_max,windspeed_10m_max,windgusts_10m_max,winddirection_10m_dominant,shortwave_radiation_sum,et0_fao_evapotranspiration
-# &forecast_days=1&start_date=2023-05-28&end_date=2023-06-03&timezone=America%2FChicago"
-
-
