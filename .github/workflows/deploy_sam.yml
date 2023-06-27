@@ -45,15 +45,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      # - uses: actions/download-artifact@master
-      #   with:
-      #     name: python_package
-      #     path: dist/
+      - uses: actions/download-artifact@master
+        with:
+          name: python_package
+          path: dist/
 
       - name: Test python package
         run: |
           pip install pytest pyspark
-          # pip install ./dist/*
+          pip install ./dist/*
           pip install -r src/app/requirements.txt
           python -m pytest
 
