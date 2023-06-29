@@ -110,6 +110,7 @@ class TestSparkJob(unittest.TestCase):
             .master("local[1]")
             .config("spark.driver.cores", 1)
             .config("spark.driver.memory", "512m")
+            .config("spark.default.parallelism", 1)
             .getOrCreate()
         )
 
@@ -118,7 +119,7 @@ class TestSparkJob(unittest.TestCase):
         # Stop the SparkSession
         cls.spark.stop()
 
-
+    @patch("app.config.API_PARALLELISM", 1)
     def test_transform_function(self) -> None:
         from app.main import transform
 
@@ -160,7 +161,7 @@ class TestSparkJob(unittest.TestCase):
         assert_df_equality(
             new_weathers.orderBy("date", "latitude", "longitude").select("date", "latitude", "longitude"),
             expected_output_df.orderBy("date", "latitude", "longitude").select("date", "latitude", "longitude"),
-            # ignore_row_order=True,
+            ignore_row_order=True,
             # ignore_column_order=True
         )
 
