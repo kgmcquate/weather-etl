@@ -106,7 +106,11 @@ class TestSparkJob(unittest.TestCase):
     def setUpClass(cls):
         # Create a SparkSession for testing
         cls.spark: SparkSession = (
-            SparkSession.builder.master("local[1]").getOrCreate()
+            SparkSession.builder
+            .master("local[1]")
+            .config("spark.driver.cores", 1)
+            .config("spark.driver.memory", "256m")
+            .getOrCreate()
         )
 
     @classmethod

@@ -62,7 +62,6 @@ def transform(
             [[d] for d in weather_dates],
             schema=StructType().add(field="date", data_type=DateType())
         )
-        .hint("broadcast")
     )
 
     if logger.isEnabledFor(logging.DEBUG):
@@ -70,7 +69,7 @@ def transform(
         needed_dates_df.cache().show()
 
 
-    weathers_needed = latlngs_df.crossJoin(needed_dates_df)
+    weathers_needed = latlngs_df.crossJoin(needed_dates_df.hint("broadcast"))
 
     # Weathers that aren't already in the DB
     weathers_to_get = (
