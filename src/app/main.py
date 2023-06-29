@@ -1,6 +1,6 @@
 import os, sys, json, boto3
 from pyspark.sql import SparkSession, DataFrame
-from pyspark.sql.types import StructType, StructField, DateType, StringType, FloatType, IntegerType, TimestampType
+from pyspark.sql.types import StructType, StructField, DateType, StringType, DoubleType, IntegerType, TimestampType
 from pyspark.sql.functions import col, lit, max, min, coalesce
 import dataclasses
 import datetime
@@ -17,7 +17,7 @@ def get_jdbc_options():
     from .database import db_endpoint, db_password, db_username
     jdbc_url = f"jdbc:postgresql://{db_endpoint}:5432/"
 
-    # logger.debug(jdbc_url)
+    # print(jdbc_url)
 
     return {
         "url": jdbc_url,
@@ -66,7 +66,7 @@ def transform(
     )
 
     if logger.isEnabledFor(logging.DEBUG):
-        logger.debug(f"Dates needed:")
+        print(f"Dates needed:")
         needed_dates_df.cache().show()
 
 
@@ -103,8 +103,8 @@ def transform(
         errors.cache()
         cnt = errors.count()
         if cnt > 0:
-            logger.debug(f"{str(cnt)} Errors:")
-            logger.debug(errors.take(100))
+            print(f"{str(cnt)} Errors:")
+            print(errors.take(100))
 
     
     weathers_rdd = (
@@ -117,11 +117,11 @@ def transform(
 
     if logger.isEnabledFor(logging.DEBUG):
         weathers_rdd.cache()
-        logger.debug(weathers_rdd.take(10))
+        print(weathers_rdd.take(10))
 
     def get_pyspark_type(the_type):
         return {
-            float: FloatType(),
+            float: DoubleType(),
             int: IntegerType(),
             str: StringType(),
             datetime.date: DateType()
@@ -143,7 +143,7 @@ def transform(
     if logger.isEnabledFor(logging.DEBUG):
         new_weathers.cache()
         cnt = new_weathers.count()
-        logger.debug(f"Number of successful results: {cnt}")
+        print(f"Number of successful results: {cnt}")
         new_weathers.show()
 
     return new_weathers

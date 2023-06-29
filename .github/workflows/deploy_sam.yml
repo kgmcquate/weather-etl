@@ -55,7 +55,7 @@ jobs:
           pip install pytest pyspark
           pip install ./dist/*
           pip install -r src/app/requirements.txt
-          python -m pytest
+          python -m pytest -s
 
   deploy:
     needs: test

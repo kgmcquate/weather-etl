@@ -83,6 +83,9 @@ class WeatherRequest:
                 for feature in self.features:
                     features_dict[feature] = daily_data[feature][i]
 
+                # "daily":{"time":["2023-05-28",
+                assert self.start_date <= datetime.date.fromisoformat(date) <= self.end_date
+
                 daily_weathers.append(
                     DailyWeather(
                         date=date,

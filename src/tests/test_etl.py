@@ -1,12 +1,14 @@
 import datetime
+from dataclasses import dataclass
 import os
 import unittest
 from unittest.mock import MagicMock, patch
 from chispa.dataframe_comparer import assert_df_equality
+import pandas as pd
+import json
+from pyspark.sql import SparkSession, DataFrame
 
-from pyspark.sql import SparkSession
 # from your_module import main
-from app.main import transform
 
 
 # def get_test_jdbc_options():
@@ -20,9 +22,6 @@ from app.main import transform
 #         "url": jdbc_url,
 #         "driver": "org.sqlite.JDBC"
 #     }
-
-mock_response = {"latitude":52.52,"longitude":13.419998,"generationtime_ms":0.6489753723144531,"utc_offset_seconds":-18000,"timezone":"America/Chicago","timezone_abbreviation":"CDT","elevation":38.0,"daily_units":{"time":"iso8601","temperature_2m_max":"°C","temperature_2m_min":"°C","sunrise":"iso8601","sunset":"iso8601","uv_index_max":"","uv_index_clear_sky_max":"","precipitation_sum":"mm","rain_sum":"mm","showers_sum":"mm","snowfall_sum":"cm","precipitation_hours":"h","precipitation_probability_max":"%","windspeed_10m_max":"km/h","windgusts_10m_max":"km/h","winddirection_10m_dominant":"°","shortwave_radiation_sum":"MJ/m²","et0_fao_evapotranspiration":"mm"},"daily":{"time":["2023-05-28","2023-05-29","2023-05-30","2023-05-31","2023-06-01","2023-06-02","2023-06-03"],"temperature_2m_max":[23.8,21.5,22.3,25.1,21.9,19.1,20.0],"temperature_2m_min":[10.4,8.5,9.3,10.6,9.6,6.8,7.8],"sunrise":["2023-05-27T21:50","2023-05-28T21:49","2023-05-29T21:48","2023-05-30T21:48","2023-05-31T21:47","2023-06-01T21:46","2023-06-02T21:45"],"sunset":["2023-05-28T14:16","2023-05-29T14:17","2023-05-30T14:18","2023-05-31T14:20","2023-06-01T14:21","2023-06-02T14:22","2023-06-03T14:23"],"uv_index_max":[6.60,5.85,6.60,6.20,6.70,6.65,6.60],"uv_index_clear_sky_max":[6.60,6.60,6.60,6.70,6.70,6.65,6.65],"precipitation_sum":[0.00,0.00,0.00,0.00,0.00,0.00,0.00],"rain_sum":[0.00,0.00,0.00,0.00,0.00,0.00,0.00],"showers_sum":[0.00,0.00,0.00,0.00,0.00,0.00,0.00],"snowfall_sum":[0.00,0.00,0.00,0.00,0.00,0.00,0.00],"precipitation_hours":[0.0,0.0,0.0,0.0,0.0,0.0,0.0],"precipitation_probability_max":[0,3,0,0,0,0,0],"windspeed_10m_max":[14.5,13.0,11.7,10.5,14.1,16.7,12.6],"windgusts_10m_max":[31.7,32.0,33.1,25.2,34.2,39.2,34.2],"winddirection_10m_dominant":[55,343,22,308,303,37,73],"shortwave_radiation_sum":[28.32,24.56,27.81,26.50,26.36,23.46,28.04],"et0_fao_evapotranspiration":[5.23,4.76,5.20,5.16,4.67,4.60,4.99]}}
-
 
 lakes_schema = """
     id INT,
@@ -45,8 +44,8 @@ daily_weather_schema = """
     timezone STRING NOT NULL,
     temperature_2m_max DOUBLE ,
     temperature_2m_min DOUBLE,
-    sunrise DATE,
-    sunset DATE,
+    sunrise TIMESTAMP,
+    sunset TIMESTAMP,
     uv_index_max DOUBLE,
     uv_index_clear_sky_max DOUBLE,
     precipitation_sum DOUBLE,
@@ -63,76 +62,85 @@ daily_weather_schema = """
 """
 
 
-class TestMainFunction(unittest.TestCase):
+class TestAPIRequest(unittest.TestCase):
+    @patch("app.data_models.requests.get")
+    def test_api_call_mock(self, mock_get: MagicMock) -> None:
+        from app.data_models import WeatherRequest
 
+        test_case_id = "2"
+        test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), f"data_files/case_{test_case_id}/")
+
+        # Mock API response
+        resp = json.loads(open(f"{test_data_path}/api_response.json").read())
+        mock_weather_api_response: MagicMock = MagicMock()
+        mock_weather_api_response.json.return_value = resp
+
+        mock_get.return_value = mock_weather_api_response
+
+        # "daily":{"time":["2023-05-28",
+
+        w_req = WeatherRequest(
+            start_date=datetime.date.fromisoformat("2023-05-28"),
+            end_date=datetime.date.fromisoformat("2023-06-03"),
+            latitude=52.52,
+            longitude=13.419998
+        )
+
+        self.assertDictEqual(w_req._send_request().json(), resp)
+
+        daily_weathers = w_req.get_weather_data()
+
+        import pprint
+        
+        from app.data_models import DailyWeather
+
+        expected_weathers = eval(open(f"{test_data_path}/daily_weathers.py").read())
+
+        self.assertListEqual(
+            daily_weathers,
+            expected_weathers
+        )
+
+
+
+class TestSparkJob(unittest.TestCase):
+    """Testing the spark job locally"""
     @classmethod
     def setUpClass(cls):
         # Create a SparkSession for testing
-        cls.spark: SparkSession = SparkSession.builder \
-            .appName("TestApp") \
-            .master("local[1]") \
-            .getOrCreate()
+        cls.spark: SparkSession = (
+            SparkSession.builder.master("local[1]").getOrCreate()
+        )
 
     @classmethod
     def tearDownClass(cls):
         # Stop the SparkSession
         cls.spark.stop()
 
-    @patch('app.data_models.requests.get')
-    def test_transform_function(
-        self,
-        mock_get: MagicMock
-    ) -> None:
+
+    def test_transform_function(self) -> None:
+        from app.main import transform
+
+        test_case_id = "1"
+        test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), f"data_files/case_{test_case_id}/")
+
         # Define test input parameters
         current_date: datetime.date = datetime.date(2023, 6, 25)
         lookback_days: int = 2
 
-        # Mock API response
-        mock_weather_api_response: MagicMock = MagicMock()
-        mock_weather_api_response.json.return_value = {
-            "daily": {
-                "time": ["2023-06-23", "2023-06-24"],
-                "temperature_2m_max": [25.0, 28.0],
-                "temperature_2m_min": [18.0, 20.0],
-                "sunrise": ["06:00:00", "05:59:00"],
-                "sunset": ["20:00:00", "20:01:00"],
-                "uv_index_max": [7.0, 8.0],
-                "uv_index_clear_sky_max": [9.0, 10.0],
-                "precipitation_sum": [0.5, 1.2],
-                "rain_sum": [0.3, 0.8],
-                "showers_sum": [0.1, 0.4],
-                "snowfall_sum": [0.0, 0.0],
-                "precipitation_hours": [5.0, 7.0],
-                "precipitation_probability_max": [50, 60],
-                "windspeed_10m_max": [15.0, 18.0],
-                "windgusts_10m_max": [20.0, 22.0],
-                "winddirection_10m_dominant": [180, 200],
-                "shortwave_radiation_sum": [1000.0, 1200.0],
-                "et0_fao_evapotranspiration": [4.0, 5.0]
-            },
-            "timezone": "America/New_York"
-        }
-
-        mock_get.return_value = mock_weather_api_response
-
-        # mock_new_weathers_df = self.spark.createDataFrame()
-
-        pyfile_path = os.path.dirname(os.path.realpath(__file__))
 
         mock_lakes_table_df = (
-            self.spark.read
-            .option("delimiter", "\t")
+            self.spark.read.option("delimiter", "\t")
             .option("header", "true")
             .schema(lakes_schema)
-            .csv(os.path.join(pyfile_path, "data_files/test_lakes.tsv"))
+            .csv(f"{test_data_path}lakes.tsv")
         )
 
         mock_daily_weather_table_df = (
-            self.spark.read
-            .option("delimiter", "\t")
+            self.spark.read.option("delimiter", "\t")
             .option("header", "true")
             .schema(daily_weather_schema)
-            .csv(os.path.join(pyfile_path,"data_files/test_daily_weather.tsv"))
+            .csv(f"{test_data_path}daily_weather.tsv")
         )
 
         # Call the main function
@@ -140,12 +148,20 @@ class TestMainFunction(unittest.TestCase):
             lakes_table_df=mock_lakes_table_df,
             daily_weather_table_df=mock_daily_weather_table_df,
             current_date=current_date,
-            lookback_days=lookback_days
+            lookback_days=lookback_days,
         )
 
         new_weathers.show()
 
-        # assert_df_equality(new_weathers, mock_new_weathers_df, ignore_row_order=True)
+        expected_output_df = self.spark.read.schema(daily_weather_schema).csv(f"{test_data_path}output_df.csv")
+
+
+        assert_df_equality(
+            new_weathers.orderBy("date", "latitude", "longitude").select("date", "latitude", "longitude"),
+            expected_output_df.orderBy("date", "latitude", "longitude").select("date", "latitude", "longitude"),
+            # ignore_row_order=True,
+            # ignore_column_order=True
+        )
 
         # # Assertions
         # # Verify that the API request was made with the expected URL
