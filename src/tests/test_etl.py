@@ -109,7 +109,7 @@ class TestSparkJob(unittest.TestCase):
             SparkSession.builder
             .master("local[1]")
             .config("spark.driver.cores", 1)
-            .config("spark.driver.memory", "256m")
+            .config("spark.driver.memory", "512m")
             .getOrCreate()
         )
 
