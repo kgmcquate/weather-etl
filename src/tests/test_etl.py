@@ -4,11 +4,8 @@ import os
 import unittest
 from unittest.mock import MagicMock, patch
 from chispa.dataframe_comparer import assert_df_equality
-import pandas as pd
 import json
 from pyspark.sql import SparkSession, DataFrame
-
-# from your_module import main
 
 
 # def get_test_jdbc_options():
