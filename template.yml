@@ -27,22 +27,22 @@ Parameters:
     Default: subnet-0cdc957115446f72d
 
 Resources:
-  ETLJobTrigger:
-    Type: AWS::Events::Rule
-    Properties: 
-      # Description: String
-      Name: WeatherETLJobTrigger
-      RoleArn: !Ref ExecutionRoleArn
-      ScheduleExpression: "cron(0 6 * * ? *)"
-      State: ENABLED
-      Targets:
-        - Id: ETLStepFunction
-          Arn: !GetAtt StepFunctionStateMachine.Arn
-          Input: "{\n  \"input\": \"{}\"\n}"
-          RetryPolicy:
-            MaximumEventAgeInSeconds: 300
-            MaximumRetryAttempts: 3
-          RoleArn: !Ref ExecutionRoleArn
+  # ETLJobTrigger:
+  #   Type: AWS::Events::Rule
+  #   Properties: 
+  #     # Description: String
+  #     Name: WeatherETLJobTrigger
+  #     RoleArn: !Ref ExecutionRoleArn
+  #     ScheduleExpression: "cron(0 6 * * ? *)"
+  #     State: ENABLED
+  #     Targets:
+  #       - Id: ETLStepFunction
+  #         Arn: !GetAtt StepFunctionStateMachine.Arn
+  #         Input: "{\n  \"input\": \"{}\"\n}"
+  #         RetryPolicy:
+  #           MaximumEventAgeInSeconds: 300
+  #           MaximumRetryAttempts: 3
+  #         RoleArn: !Ref ExecutionRoleArn
 
   # EMRServerlessApplication:
   #   Type: AWS::EMRServerless::Application
@@ -68,58 +68,51 @@ Resources:
   #       SubnetIds: !Ref SubnetIds
 
   
-  StepFunctionStateMachine:
-    Type: AWS::StepFunctions::StateMachine
-    Properties:
-      StateMachineName: EMRWeatherETLJobStateMachine
-      RoleArn: !Ref ExecutionRoleArn
-      Definition: {
-            "Comment": "Runs EMR Serverless job for Weather ETL",
-            "StartAt": "StartJobRun",
-            "States": {
-                "StartJobRun": {
-                  "Type": "Task",
-                  "End": true,
-                  "Parameters": {
-                      "Name": "Weather ETL",
-                      "ClientToken.$": "States.UUID()",
-                      "ApplicationId": !Ref EMRServerlessApplication,
-                      "ExecutionRoleArn": !Ref ExecutionRoleArn,
-                      "JobDriver": {
-                        "SparkSubmit": {
-                            "EntryPoint": !Sub "s3://${DeploymentZone}/weather_etl/spark_entrypoint.py",
-                            "SparkSubmitParameters": !Sub "
-                                --driver-memory 2G 
-                                --driver-cores 2 
-                                --num-executors 1 
-                                --executor-memory 2G
-                                --executor-cores 2
-                                --conf spark.dynamicAllocation.enabled=false
-                                --jars https://repo1.maven.org/maven2/org/postgresql/postgresql/42.6.0/postgresql-42.6.0.jar
-                              "
-                        }
-                      },
-                      "ConfigurationOverrides": {
-                        "MonitoringConfiguration": {
-                          "S3MonitoringConfiguration": {
-                            "LogUri": !Sub "s3://${EmrZone}/logging/"
-                          }
-                        }
-                      },
-                      "ExecutionTimeoutMinutes": 120
-                  },
-                  "Resource": "arn:aws:states:::aws-sdk:emrserverless:startJobRun"
-                }
-            }
-        }
+  # StepFunctionStateMachine:
+  #   Type: AWS::StepFunctions::StateMachine
+  #   Properties:
+  #     StateMachineName: EMRWeatherETLJobStateMachine
+  #     RoleArn: !Ref ExecutionRoleArn
+  #     Definition: {
+  #           "Comment": "Runs EMR Serverless job for Weather ETL",
+  #           "StartAt": "StartJobRun",
+  #           "States": {
+  #               "StartJobRun": {
+  #                 "Type": "Task",
+  #                 "End": true,
+  #                 "Parameters": {
+  #                     "Name": "Weather ETL",
+  #                     "ClientToken.$": "States.UUID()",
+  #                     "ApplicationId": !Ref EMRServerlessApplication,
+  #                     "ExecutionRoleArn": !Ref ExecutionRoleArn,
+  #                     "JobDriver": {
+  #                       "SparkSubmit": {
+  #                           "EntryPoint": !Sub "s3://${DeploymentZone}/weather_etl/spark_entrypoint.py",
+  #                           "SparkSubmitParameters": !Sub "
+  #                               --driver-memory 2G 
+  #                               --driver-cores 2 
+  #                               --num-executors 1 
+  #                               --executor-memory 2G
+  #                               --executor-cores 2
+  #                               --conf spark.dynamicAllocation.enabled=false
+  #                               --jars https://repo1.maven.org/maven2/org/postgresql/postgresql/42.6.0/postgresql-42.6.0.jar
+  #                             "
+  #                       }
+  #                     },
+  #                     "ConfigurationOverrides": {
+  #                       "MonitoringConfiguration": {
+  #                         "S3MonitoringConfiguration": {
+  #                           "LogUri": !Sub "s3://${EmrZone}/logging/"
+  #                         }
+  #                       }
+  #                     },
+  #                     "ExecutionTimeoutMinutes": 120
+  #                 },
+  #                 "Resource": "arn:aws:states:::aws-sdk:emrserverless:startJobRun"
+  #               }
+  #           }
+  #       }
 
-# --jars https://repo1.maven.org/maven2/org/postgresql/postgresql/42.6.0/postgresql-42.6.0.jar
-                                # --jars https://repo1.maven.org/maven2/org/postgresql/postgresql/42.6.0/postgresql-42.6.0.jar
-      
-                                # --conf spark.archives=s3://${DeploymentZone}/weather_etl/pyspark_env.tar.gz#environment
-                                # --conf spark.emr-serverless.driverEnv.PYSPARK_DRIVER_PYTHON=/home/hadoop/environment/bin/python3
-                                # --conf spark.emr-serverless.driverEnv.PYSPARK_PYTHON=/home/hadoop/environment/bin/python3
-                                # --conf spark.executorEnv.PYSPARK_PYTHON=/home/hadoop/environment/bin/python3
 
   ECRRepository:
     Type: AWS::ECR::Repository
