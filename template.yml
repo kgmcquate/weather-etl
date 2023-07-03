@@ -20,11 +20,11 @@ Parameters:
 
   SecurityGroupIds:
     Type: CommaDelimitedList
-    Default: sg-06ccb1d8e6918a05c
+    Default: sg-00467e8ac3c53cb3f
 
   SubnetIds:
     Type: CommaDelimitedList
-    Default: subnet-07e2023c25351b29b
+    Default: subnet-0cdc957115446f72d
 
 Resources:
   ETLJobTrigger:
@@ -119,7 +119,7 @@ Resources:
                                 # --conf spark.emr-serverless.driverEnv.PYSPARK_DRIVER_PYTHON=/home/hadoop/environment/bin/python3
                                 # --conf spark.emr-serverless.driverEnv.PYSPARK_PYTHON=/home/hadoop/environment/bin/python3
                                 # --conf spark.executorEnv.PYSPARK_PYTHON=/home/hadoop/environment/bin/python3
-                                
+
   ECRRepository:
     Type: AWS::ECR::Repository
     Properties:
