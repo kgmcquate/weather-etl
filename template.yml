@@ -46,6 +46,7 @@ Resources:
 
   EMRServerlessApplication:
     Type: AWS::EMRServerless::Application
+    DependsOn: ECRRepository
     Properties: 
       Name: WeatherETLApplication
       Architecture: X86_64
