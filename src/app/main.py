@@ -44,8 +44,8 @@ def main(
         .format("jdbc")
         .load()
         .select(
-            coalesce("latitude", "nearby_city_latitude").alias("latitude"), 
-            coalesce("longitude", "nearby_city_longitude").alias("longitude")
+            "latitude", 
+            "longitude"
         )
         .distinct() # Some locations have the same lat/long
     )
