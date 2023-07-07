@@ -1,3 +1,6 @@
+raw_data/
+spark-warehouse/
+
 .aws-sam/
 
 settings.json
