@@ -106,7 +106,7 @@ Resources:
                           }
                         }
                       },
-                      "ExecutionTimeoutMinutes": 120
+                      "ExecutionTimeoutMinutes": 300
                   },
                   "Resource": "arn:aws:states:::aws-sdk:emrserverless:startJobRun"
                 }
