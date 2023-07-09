@@ -43,6 +43,8 @@ def main(
         .options(**get_jdbc_options())
         .format("jdbc")
         .load()
+        .sort(col("areasqkm").desc())
+        .limit(2000)
         .select(
             "latitude", 
             "longitude"
