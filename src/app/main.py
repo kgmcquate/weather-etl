@@ -7,8 +7,9 @@ from .database import engine
 from .config import DEFAULT_LOOKBACK_DAYS, API_PARALLELISM, lakes_table_name, weather_by_day_table_name, weather_by_day_temp_table_name
 from .data_models import DailyWeather, WeatherRequest
 import logging
+from sqlalchemy import text
 
-NUMBER_OF_WATERBODIES_LIMIT = 400
+NUMBER_OF_WATERBODIES_LIMIT = 2000
 
 def get_jdbc_options():
     from .database import db_endpoint, db_password, db_username
@@ -169,37 +170,14 @@ def main(
     cols_string = ','.join([f'"{c}"' for c in new_weathers.columns])
 
     with engine.connect() as con:
-        resp = con.execute(f"""
+        resp = con.execute(text(
+        f"""
             MERGE INTO {weather_by_day_table_name} tgt
             USING {weather_by_day_temp_table_name} src
             ON tgt.date = src.date AND tgt.longitude = src.longitude AND tgt.latitude = src.latitude
             WHEN MATCHED THEN do NOTHING
             when not matched then insert ({cols_string})
             values ({cols_string})                 
-        """)
+        """))
         for row in resp:
             print(row)
-
-
-
-
-    # req = WeatherRequest(
-    #     start_date=datetime.date.fromisoformat("2023-01-01"),
-    #     end_date=datetime.date.fromisoformat("2023-01-07"),
-    #     latitude=52.52,
-    #     longitude=13.419998
-    # )
-
-    # pprint.pprint(
-    #     req.get_weather_data()
-    # )
-
-
-
-
-
-# url = "https://api.open-meteo.com/v1/forecast?latitude=52.52&longitude=13.41&daily=
-# temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max,uv_index_clear_sky_max,precipitation_sum,rain_sum,showers_sum,snowfall_sum,precipitation_hours,precipitation_probability_max,windspeed_10m_max,windgusts_10m_max,winddirection_10m_dominant,shortwave_radiation_sum,et0_fao_evapotranspiration
-# &forecast_days=1&start_date=2023-05-28&end_date=2023-06-03&timezone=America%2FChicago"
-
-
