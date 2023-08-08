@@ -8,6 +8,7 @@ from .config import DEFAULT_LOOKBACK_DAYS, API_PARALLELISM, lakes_table_name, we
 from .data_models import DailyWeather, WeatherRequest
 import logging
 
+NUMBER_OF_WATERBODIES_LIMIT = 400
 
 def get_jdbc_options():
     from .database import db_endpoint, db_password, db_username
@@ -44,7 +45,7 @@ def main(
         .format("jdbc")
         .load()
         .sort(col("areasqkm").desc())
-        .limit(2000)
+        .limit(NUMBER_OF_WATERBODIES_LIMIT)
         .select(
             "latitude", 
             "longitude"
