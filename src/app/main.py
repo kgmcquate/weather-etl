@@ -3,8 +3,8 @@ from pyspark.sql import SparkSession
 from pyspark.sql.types import StructType, StructField, DateType, StringType, FloatType, IntegerType, TimestampType
 import dataclasses
 import datetime
-# import database
-from .config import DEFAULT_LOOKBACK_DAYS, API_PARALLELISM, lakes_table_name, weather_by_day_table_name
+from database import engine
+from .config import DEFAULT_LOOKBACK_DAYS, API_PARALLELISM, lakes_table_name, weather_by_day_table_name, weather_by_day_temp_table_name
 from .data_models import DailyWeather, WeatherRequest
 import logging
 
@@ -159,12 +159,28 @@ def main(
     # TODO write to stage table and merge to avoid conflicts from live updates from the API
     (
         new_weathers.write
-        .option("dbtable", weather_by_day_table_name)
+        .option("dbtable", weather_by_day_temp_table_name) 
         .options(**get_jdbc_options())
         .format("jdbc")
-        .mode("append")
+        .mode("overwrite")
         .save()
     )
+
+    cols_string = ','.join([f'"{c}"' for c in new_weathers.columns])
+
+    with engine.connect() as con:
+        resp = con.execute(f"""
+            MERGE INTO {weather_by_day_table_name} tgt
+            USING {weather_by_day_temp_table_name} src
+            ON tgt.date = src.date AND tgt.longitude = src.longitude AND tgt.latitude = src.latitude
+            WHEN MATCHED THEN do NOTHING
+            when not matched then insert ({cols_string})
+            values ({cols_string})                 
+        """)
+        for row in resp:
+            print(row)
+
+
 
 
     # req = WeatherRequest(

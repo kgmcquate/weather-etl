@@ -1,6 +1,7 @@
 import json
 import os
 import boto3
+import sqlalchemy
 
 secret_arn = os.environ.get("DB_CREDS_SECRET_ARN", "arn:aws:secretsmanager:us-east-1:117819748843:secret:lake-freeze-db-creds")
 
@@ -20,7 +21,7 @@ db_password = secret["password"]
 
 
 # print("creating engine")
-# engine = sqlmodel.create_engine(f'postgresql+psycopg2://{db_username}:{db_password}@{db_endpoint}') #/lake_freeze
+engine = sqlalchemy.create_engine(f'postgresql+psycopg2://{db_username}:{db_password}@{db_endpoint}') #/lake_freeze
 
 
 
