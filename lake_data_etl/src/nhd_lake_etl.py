@@ -180,10 +180,10 @@ select
 	case when is_close THEN max_depth_m	end as max_depth_m,
 	areasqkm,
 	elevation,
-	bounds[1] as min_latitude,
-	bounds[3] as max_latitude,
-	bounds[2] as min_longitude,
-	bounds[4] as max_longitude
+	bounds[1] as min_longitude,
+	bounds[3] as max_longitude,
+	bounds[2] as min_latitude,
+	bounds[4] as max_latitude
 from ranked
 where rnk = 1
 
