@@ -3,7 +3,7 @@ from pyspark.sql import SparkSession
 from pyspark.sql.types import StructType, StructField, DateType, StringType, FloatType, IntegerType, TimestampType
 import dataclasses
 import datetime
-from database import engine
+from .database import engine
 from .config import DEFAULT_LOOKBACK_DAYS, API_PARALLELISM, lakes_table_name, weather_by_day_table_name, weather_by_day_temp_table_name
 from .data_models import DailyWeather, WeatherRequest
 import logging
