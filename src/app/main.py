@@ -179,5 +179,3 @@ def main(
             when not matched then insert ({cols_string})
             values ({cols_string})                 
         """))
-        for row in resp:
-            print(row)
