@@ -169,13 +169,15 @@ def main(
 
     cols_string = ','.join([f'"{c}"' for c in new_weathers.columns])
 
-    with engine.connect() as con:
-        resp = con.execute(text(
-        f"""
+    merge_sql = f"""
             MERGE INTO {weather_by_day_table_name} tgt
             USING {weather_by_day_temp_table_name} src
             ON tgt.date = src.date AND tgt.longitude = src.longitude AND tgt.latitude = src.latitude
             WHEN MATCHED THEN do NOTHING
             when not matched then insert ({cols_string})
-            values ({cols_string})                 
-        """))
+            values ({cols_string})
+        """
+
+    with engine.connect() as con:
+        resp = con.execute(text(merge_sql))
+        print(resp)
