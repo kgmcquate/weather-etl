@@ -9,7 +9,7 @@ from .data_models import DailyWeather, WeatherRequest
 import logging
 from sqlalchemy import text
 
-NUMBER_OF_WATERBODIES_LIMIT = 2100
+NUMBER_OF_WATERBODIES_LIMIT = 1200
 
 def get_jdbc_options():
     from .database import db_endpoint, db_password, db_username
