@@ -4,12 +4,18 @@ from pyspark.sql.types import StructType, StructField, DateType, StringType, Flo
 import dataclasses
 import datetime
 from .database import engine
-from .config import DEFAULT_LOOKBACK_DAYS, API_PARALLELISM, lakes_table_name, weather_by_day_table_name, weather_by_day_temp_table_name
+from .config import (
+    DEFAULT_LOOKBACK_DAYS, 
+    API_PARALLELISM, 
+    NUMBER_OF_WATERBODIES_LIMIT, 
+    lakes_table_name, 
+    weather_by_day_table_name, 
+    weather_by_day_temp_table_name
+)
 from .data_models import DailyWeather, WeatherRequest
 import logging
 from sqlalchemy import text
 
-NUMBER_OF_WATERBODIES_LIMIT = 1200
 
 def get_jdbc_options():
     from .database import db_endpoint, db_password, db_username
@@ -180,4 +186,7 @@ def main(
 
     with engine.connect() as con:
         resp = con.execute(text(merge_sql))
-        print(resp)
+        try:
+            print(resp.scalar())
+        except Exception as e:
+            print(e)
