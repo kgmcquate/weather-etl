@@ -99,6 +99,13 @@ def main(
         )
     )
 
+    if logger.isEnabledFor(logging.DEBUG):
+        weathers_to_get.cache()
+        cnt = weathers_to_get.count()
+        if cnt > 0:
+            print(f"{str(cnt)} weathers to get:")
+            weathers_to_get.show()
+
 
     responses_rdd = (
         weathers_to_get
@@ -119,8 +126,8 @@ def main(
         errors.cache()
         cnt = errors.count()
         if cnt > 0:
-            logger.debug(f"{str(cnt)} Errors:")
-            logger.debug(errors.take(100))
+            print(f"{str(cnt)} Errors:")
+            print(errors.take(100))
 
     
     weathers_rdd = (
@@ -133,7 +140,7 @@ def main(
 
     if logger.isEnabledFor(logging.DEBUG):
         weathers_rdd.cache()
-        logger.debug(weathers_rdd.take(10))
+        print(weathers_rdd.take(10))
 
     def get_pyspark_type(the_type):
         return {
@@ -159,7 +166,7 @@ def main(
     if logger.isEnabledFor(logging.DEBUG):
         new_weathers.cache()
         cnt = new_weathers.count()
-        logger.debug(f"Number of successful results: {cnt}")
+        print(f"Number of successful results: {cnt}")
         new_weathers.show()
 
 

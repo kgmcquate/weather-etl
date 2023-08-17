@@ -3,4 +3,5 @@ boto3
 urllib3
 sqlalchemy
 psycopg2-binary
+pyarrow
 # pyspark # provided by emr
