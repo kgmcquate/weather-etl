@@ -189,11 +189,16 @@ def main(
             WHEN MATCHED THEN do NOTHING
             when not matched then insert ({cols_string})
             values ({cols_string})
+            ;
         """
+    
+    with engine.begin() as conn:
+        conn.execute(merge_sql)
+        conn.execute("COMMIT;")
 
-    with engine.connect() as con:
-        resp = con.execute(text(merge_sql).execution_options(autocommit=True))
-        try:
-            print(resp.scalar())
-        except Exception as e:
-            print(e)
+    # with engine.connect() as con:
+    #     resp = con.execute(text(merge_sql).execution_options(autocommit=True))
+    #     try:
+    #         print(resp.scalar())
+    #     except Exception as e:
+    #         print(e)
