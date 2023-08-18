@@ -193,8 +193,8 @@ def main(
         """
     
     with engine.begin() as conn:
-        conn.execute(merge_sql)
-        conn.execute("COMMIT;")
+        conn.execute(text(merge_sql))
+        # conn.
 
     # with engine.connect() as con:
     #     resp = con.execute(text(merge_sql).execution_options(autocommit=True))
