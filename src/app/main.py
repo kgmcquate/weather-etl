@@ -192,7 +192,7 @@ def main(
         """
 
     with engine.connect() as con:
-        resp = con.execute(text(merge_sql))
+        resp = con.execute(text(merge_sql).execution_options(autocommit=True))
         try:
             print(resp.scalar())
         except Exception as e:
