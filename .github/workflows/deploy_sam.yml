@@ -45,7 +45,7 @@ jobs:
 
       - name: Copy Python files to S3 deployment zone
         run: |
-          aws s3 cp spark_entrypoint.py s3://deployment-zone-${AWS_ACCOUNT_ID}/weather_etl/
+          aws s3 cp spark_entrypoint.py s3://deployment-zone-${AWS_ACCOUNT_ID}-us-east-1/weather_etl/
     
   deploy_sam:
     name: Deploy SAM template

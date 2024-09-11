@@ -8,7 +8,7 @@ Parameters:
 
   DeploymentZone:
     Type: String
-    Default: deployment-zone-117819748843
+    Default: deployment-zone-117819748843-us-east-1
 
   EmrZone:
     Type: String
