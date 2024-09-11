@@ -31,7 +31,7 @@ Resources:
     Type: AWS::Events::Rule
     Properties: 
       # Description: String
-      Name: WeatherETLJobTrigger
+      Name: weather-etl-trigger
       RoleArn: !Ref ExecutionRoleArn
       ScheduleExpression: "cron(0 6 * * ? *)"
       State: ENABLED
@@ -48,7 +48,7 @@ Resources:
     Type: AWS::EMRServerless::Application
     DependsOn: ECRRepository
     Properties: 
-      Name: WeatherETLApplication
+      Name: weather-etl
       Architecture: X86_64
       AutoStartConfiguration: 
         Enabled: true
@@ -71,7 +71,7 @@ Resources:
   StepFunctionStateMachine:
     Type: AWS::StepFunctions::StateMachine
     Properties:
-      StateMachineName: EMRWeatherETLJobStateMachine
+      StateMachineName: weather-etl
       RoleArn: !Ref ExecutionRoleArn
       Definition: {
             "Comment": "Runs EMR Serverless job for Weather ETL",
@@ -112,45 +112,4 @@ Resources:
                   "Resource": "arn:aws:states:::aws-sdk:emrserverless:startJobRun"
                 }
             }
-        }
-
-
-  ECRRepository:
-    Type: AWS::ECR::Repository
-    Properties:
-      RepositoryName: "weather-etl/pyspark-env"
-      RepositoryPolicyText: {
-          "Version": "2012-10-17",
-          "Statement": [
-            {
-              "Sid": "Emr Serverless Custom Image Support",
-              "Effect": "Allow",
-              "Principal": {
-                "Service": "emr-serverless.amazonaws.com"
-              },
-              "Action": [
-                "ecr:BatchGetImage",
-                "ecr:DescribeImages",
-                "ecr:GetDownloadUrlForLayer"
-              ]
-            }
-          ]
-        }
-
-  BaseECRRepository:
-    Type: AWS::ECR::Repository
-    Properties:
-      RepositoryName: "emr-610/python-311"
-      RepositoryPolicyText: {
-          "Version": "2012-10-17",
-          "Statement": [
-            {
-              "Sid": "Emr Serverless Custom Image Support",
-              "Effect": "Allow",
-              "Principal": "*",
-              "Action": [
-                "ecr:*"
-              ]
-            }
-          ]
         }
