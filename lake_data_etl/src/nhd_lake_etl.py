@@ -19,9 +19,10 @@ from typing import Optional
 from sqlmodel import SQLModel, Field
 from database import engine, sqlalchemy_engine
 
-from data_models import *
+from shapely import Polygon, MultiPolygon
+from shapely.geometry import mapping
 
-from pyspark.sql import SparkSession
+from data_models import LakeGeometry
 
 # SQLModel.metadata.create_all(engine)
 
@@ -44,7 +45,7 @@ def get_jdbc_options():
 # spark = SparkSession.builder.master("local[1]")\
 #     .getOrCreate()
 
-# s3 = boto3.client('s3')
+s3 = boto3.client('s3')
 
 s3_bucket, s3_prefix = 'prd-tnm', 'StagedProducts/Hydrography/NHD/State/Shape/'
 local_data_dir = 'raw_data'
@@ -60,8 +61,8 @@ def load_geometry_data():
 
         local_filename = os.path.join(local_data_dir, filename) 
 
-        # if not os.path.exists(local_filename):
-        #     s3.download_file(s3_bucket, s3_key, local_filename)
+        if not os.path.exists(local_filename):
+            s3.download_file(s3_bucket, s3_key, local_filename)
 
         with open(local_filename, 'rb') as f:
             zip_bytes = f.read()
@@ -77,12 +78,13 @@ def load_geometry_data():
 
         
         with zipfile.ZipFile(io.BytesIO(zip_bytes), 'r') as z: # 
-            # with z.open(waterbody_dbf_filename_in_zip, 'r') as zip_f:
-            #     with open(local_waterbody_dbf_filename, 'wb') as f:
-            #         f.write(zip_f.read())
+            with z.open(waterbody_dbf_filename_in_zip, 'r') as zip_f:
+                with open(local_waterbody_dbf_filename, 'wb') as f:
+                    f.write(zip_f.read())
 
-            #     waterbodies: pd.DataFrame = Dbf5(local_waterbody_dbf_filename).to_dataframe()
-            #     lakes = waterbodies.dropna(subset=['gnis_name']) 
+                # waterbodies: pd.DataFrame = Dbf5(local_waterbody_dbf_filename).to_dataframe()
+                # lakes = waterbodies.dropna(subset=['gnis_name']) 
+                # print(lakes.head())
                 # print(waterbodies['gnis_name'])
             if not os.path.exists(local_waterbody_shp_filename):
                 with z.open(waterbody_shp_filename_in_zip, 'r') as zip_f:
@@ -96,44 +98,74 @@ def load_geometry_data():
 
         shp = gpd.read_file(local_waterbody_shp_filename)
 
-        lakes = shp.dropna(subset=['gnis_name']) # Filter out water bodies with no name
+        def get_coords(polygon):
+            coords = mapping(polygon)['coordinates']
+            
+            if isinstance(coords, list):
+                coords = coords[0]
+                return json.dumps(coords)
+            if isinstance(coords, tuple) and isinstance(coords[0], tuple) and isinstance(coords[0][0], tuple) and isinstance(coords[0][0][0], float):
+                return json.dumps(coords)
+            else:
+                raise Exception(f"bad type for {type(coords)} {coords}")
+            
+        # def get_coords(polygon: Polygon):
+        #     poly = polygon.__geo_interface__['coordinates']            
+        #     return json.dumps(poly)
+            
+            
+        shp = gpd.read_file(local_waterbody_shp_filename)
 
-        def get_coords(polygon: Polygon):
-            # if len(polygon.__geo_interface__['coordinates']) != 1:
-            #     raise Exception(f"Bad geometry {polygon.__geo_interface__['coordinates']}")
-            
-            poly = polygon.__geo_interface__['coordinates']
-            
-            # new_poly = []
-            # for point in poly:
-            #     x, y, z = point
-            #     assert z == 0.0
-            #     new_poly.append([x, y])
-            
-            return json.dumps(poly)
+        lakes = shp.dropna(subset=['gnis_name']) # Filter out water bodies with no name
 
         lakes['geometry'] = lakes['geometry'].apply(get_coords)
 
-        print(lakes )
+        # print(lakes )
 
-        # (
-        #     spark.createDataFrame(lakes)
-        #     .write
-        #     .option("dbtable", "lake_geometry")
-        #     .options(**get_jdbc_options())
-        #     .format("jdbc")
-        #     .mode("append")
-        #     .save()
-        # )
+        lakes[[
+               'boundary', 'bounds', 'bounding_box', 'bounding_box_centroid',
+               'latitude', 'longitude',
+               'min_lat', 'min_long', 'max_lat', 'max_long'
+               ]] = lakes.apply(get_bounding_box, axis=1)
+
 
         from sqlalchemy.dialects import postgresql
 
-        lakes.to_sql(name='lake_geometry', con=sqlalchemy_engine, if_exists='append', index=False
-                    )
-
-        # print(shp)
+        lakes.to_sql(name='waterbody_geometry_temp', con=sqlalchemy_engine, if_exists='append', index=False)
 
 
+def get_bounding_box(row):
+        geometry_str = row["geometry"]
+        geometry = json.loads(geometry_str)
+        # print(geometry)
+
+        polygon = MultiPolygon(
+            (Polygon(points) for points in geometry) #
+        )
+        
+        boundary = mapping(polygon.boundary)['coordinates']
+        if len(boundary) != 1:
+            # raise Exception(f"Boundary should only be 1 continuous polygon: {boundary[1:]} length: {len(boundary)}")
+            boundary = []
+        else:
+            boundary = boundary[0]
+        bounds = polygon.bounds
+
+        min_long, min_lat, max_long, max_lat = bounds
+
+        bounding_box = json.dumps(((min_lat, min_long), (min_lat, max_long), (max_lat, max_long), (max_lat, min_long)))
+
+        centroid = list(polygon.centroid.coords)[0]
+
+        bounding_box_centroid = json.dumps(( (min_lat + max_lat) / 2, (min_long + max_long) / 2 ))  # Probably should do coordinate math with a globe projection
+
+        latitude = (min_lat + max_lat) / 2
+        longitude = (min_long + max_long) / 2
+
+        return pd.Series([json.dumps(boundary), bounds, bounding_box, bounding_box_centroid, latitude, longitude, min_lat, min_long, max_lat, max_long])
+
+if __name__ == "__main__":
+    load_geometry_data()
 
 #postgres script
 """

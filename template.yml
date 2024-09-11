@@ -4,7 +4,7 @@ Transform: AWS::Serverless-2016-10-31
 Parameters:
   ExecutionRoleArn:
     Type: String
-    Default: arn:aws:iam::117819748843:role/lake-freeze-lambda-role
+    Default: arn:aws:iam::117819748843:role/service-role
 
   DeploymentZone:
     Type: String
