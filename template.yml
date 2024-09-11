@@ -16,7 +16,7 @@ Parameters:
 
   DockerImageUri:
     Type: String
-    Default: 117819748843.dkr.ecr.us-east-1.amazonaws.com/weather-etl/pyspark-env:latest
+    Default: 117819748843.dkr.ecr.us-east-1.amazonaws.com/emr-serverless:weather-etl
 
   SecurityGroupIds:
     Type: CommaDelimitedList
