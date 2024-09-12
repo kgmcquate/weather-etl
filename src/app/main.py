@@ -184,7 +184,7 @@ def main(
 
     merge_sql = f"""
             MERGE INTO {weather_by_day_table_name} tgt
-            USING {weather_by_day_temp_table_name} src
+            USING (SELECT * FROM {weather_by_day_temp_table_name} WHERE temperature_2m_max IS NOT NULL) src
             ON tgt.date = src.date AND tgt.longitude = src.longitude AND tgt.latitude = src.latitude
             WHEN MATCHED THEN do NOTHING
             when not matched then insert ({cols_string})
