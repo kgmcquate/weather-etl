@@ -19,7 +19,7 @@ from sqlalchemy import text
 
 def get_jdbc_options():
     from .database import db_endpoint, db_password, db_username
-    jdbc_url = f"jdbc:postgresql://{db_endpoint}:5432/"
+    jdbc_url = f"jdbc:postgresql://{db_endpoint}/"
 
     # logger.debug(jdbc_url)
 
